@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="Graphs.js"></script>
+</head>
+
+<body>
+    <div class="container mx-auto flex">
+        <canvas width="800" height="600" id="canvas">not supported</canvas>
+        <button id="button-submit">Submit</button>
+    </div>
+
+    <script>
+        let canvasId = "canvas";
+        let fps = 60;
+        let editable = true;
+
+        let buildable = true; // change to true if user can change the graph
+        let graph = new Graph(canvasId, fps, editable, buildable);
+
+        let node = [
+            { id: 1, xpos: 75, ypos: 80, size: 30, text: "Kab. Tangerang" },
+            { id: 2, xpos: 150, ypos: 100, size: 30, text: "Kota Tangerang" },
+            { id: 3, xpos: 225, ypos: 80, size: 30, text: "Tangsel" },
+            { id: 4, xpos: 300, ypos: 100, size: 30, text: "Kab. Bogor" },
+            { id: 5, xpos: 375, ypos: 80, size: 30, text: "Kota Bogor" },
+            { id: 6, xpos: 450, ypos: 100, size: 30, text: "Kota Depok" },
+            { id: 7, xpos: 525, ypos: 80, size: 30, text: "Jakarta" },
+            { id: 8, xpos: 600, ypos: 100, size: 30, text: "Kota Bekasi" },
+            { id: 9, xpos: 675, ypos: 80, size: 30, text: "Kab. Bekasi" }
+        ]
+
+        let createdNode = []
+
+        let connect = [
+            { id1: 1, id2: 2, directional: false },
+            // { id1: 1, id2: 3, directional: false },
+            // { id1: 2, id2: 3, directional: false }
+        ]
+
+        node.forEach(el => {
+            let nodeId = graph.node(el.xpos, el.ypos, el.size, el.text, el.id).id;
+            createdNode.push({ nodeId: nodeId, text: el.text, id: el.id });
+        })
+
+        connect.forEach(el => {
+            let nodeId1 = graph.getNodeById(createdNode.find(ell => ell.id == el.id1).nodeId);
+            let nodeId2 = graph.getNodeById(createdNode.find(ell => ell.id == el.id2).nodeId);
+            if (!el.directional) {
+                let nodeee = nodeId1.connect(nodeId2)
+                nodeee.text = 50;
+            } else {
+                nodeId1.directional(nodeId2)
+            }
+            console.log(graph.getDistance(createdNode.find(ell => ell.id == el.id1).nodeId, createdNode.find(ell => ell.id == el.id2).nodeId));
+
+            // console.log(graph.diijkstra(createdNode.find(ell => ell.id == el.id1).nodeId, createdNode.find(ell => ell.id == el.id2).nodeId))
+        })
+
+        let edges = graph.edges;
+
+        let edgesSubmit = [];
+
+
+        document.getElementById("button-submit").onclick = () => {
+
+            for (const key in edges) {
+                console.log(`start: ${edges[key].startNodeid}; end: ${edges[key].endNodeid}`);
+                let startKotaId = graph.getNodeById(edges[key].startNodeid).kotaId;
+                let endKotaId = graph.getNodeById(edges[key].endNodeid).kotaId;
+
+                edgesSubmit.push({ id1: startKotaId, id2: endKotaId, directional: false })
+            }
+
+            console.log(edgesSubmit);
+        }
+
+    </script>
+</body>
+
+</html>

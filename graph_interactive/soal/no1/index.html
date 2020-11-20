@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
+    <style>
+        .draggable {
+            touch-action: none;
+            user-select: none;
+        }
+    </style>
+    <script>
+        const position = { x: 0, y: 0 }
+
+        interact('#jawaban_persimpangan_jalan').draggable({
+            listeners: {
+                start(event) {
+                    console.log(event.type, event.target)
+                },
+                move(event) {
+                    position.x += event.dx
+                    position.y += event.dy
+
+                    event.target.style.transform =
+                        `translate(${position.x}px, ${position.y}px)`
+                },
+            }
+        })
+
+        interact('#jawaban_jalan_raya').draggable({
+            listeners: {
+                start(event) {
+                    console.log(event.type, event.target)
+                },
+                move(event) {
+                    position.x += event.dx
+                    position.y += event.dy
+
+                    event.target.style.transform =
+                        `translate(${position.x}px, ${position.y}px)`
+                },
+            }
+        })
+
+        interact('#drop_graph')
+            .dropzone({
+                ondrop: function (event) {
+                    alert(event.relatedTarget.id
+                        + ' was dropped into '
+                        + event.target.id)
+                }
+            })
+            .on('dropactivate', function (event) {
+                event.target.classList.add('drop-activated')
+            })
+
+        interact('#drop_node')
+            .dropzone({
+                ondrop: function (event) {
+                    alert(event.relatedTarget.id
+                        + ' was dropped into '
+                        + event.target.id)
+                }
+            })
+            .on('dropactivate', function (event) {
+                event.target.classList.add('drop-activated')
+            })
+
+        interact('#drop_edge')
+            .dropzone({
+                ondrop: function (event) {
+                    alert(event.relatedTarget.id
+                        + ' was dropped into '
+                        + event.target.id)
+                }
+            })
+            .on('dropactivate', function (event) {
+                event.target.classList.add('drop-activated')
+            })
+    </script>
+</head>
+
+<body>
+    <div class="container mx-auto flex mb-5">
+        <div id="jawaban_persimpangan_jalan" class="bg-white px-3 py-2 border-2 border-gray-900 rounded max-w-xs">
+            persimpangan jalan</div>
+        <div id="jawaban_jalan_raya" class="bg-white px-3 py-2 border-2 border-gray-900 rounded max-w-xs"> jalan raya
+        </div>
+    </div>
+    <div class="container mx-auto flex">
+        <div id="drop_graph" class="w-4/12 h-32 p-2 bg-red-600">Transportasi
+        </div>
+        <div id="drop_node" class="w-4/12 h-32 p-2 bg-blue-800"></div>
+        <div id="drop_edge" class="w-4/12 h-32 p-2 bg-green-800"></div>
+    </div>
+</body>
+
+</html>
