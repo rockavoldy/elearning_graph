@@ -3,4 +3,7 @@ WORKDIR /var/www/html
 
 RUN docker-php-ext-install mysqli \
     && chmod -R 775 /var/www/html \
-    && chown -R www-data:www-data /var/www/html
+    && chown -R www-data:www-data /var/www/html \
+    && a2enmod rewrite
+
+ADD . /var/www/html
