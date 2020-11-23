@@ -3,42 +3,157 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class API extends CI_Controller
 {
-    public function getSoal()
+    public function getSoal($kode_topik)
     {
+        header("Content-Type: application/json");
+        echo json_encode($this->LSoal->getListSoal($kode_topik));
     }
 
-    public function saveSoal($bentukSoal)
+    public function getSoalById($id_soal)
+    {
+        header("Content-Type: application/json");
+        echo json_encode($this->LSoal->getSoalById($id_soal));
+    }
+
+    public function saveSoal($kode_topik, $bentukSoal)
     {
         header('Content-Type: application/json');
-        if ($bentukSoal === "membuat-graf") {
-            $deskripsiSoal = $this->input->post("deskripsiSoal");
-            $listNode = $this->input->post("listNode");
-            $listEdge = $this->input->post('listEdge');
+        $response = array();
+        $kode_topik = $this->uri->segment(3);
+        switch ($bentukSoal) {
+            case "membuat-graf":
+                $deskripsiSoal = $this->input->post("deskripsiSoal");
+                $listNode = $this->input->post("listNode");
+                $listEdge = $this->input->post('listEdge');
+                $directional = $this->input->post('directional');
 
-            $listNode = $this->getNode($listNode);
-            $listEdge = $this->getEdge($listEdge);
+                $listNode = $this->getNode($listNode);
+                $listEdge = $this->getEdge($listEdge);
 
-            $id_soal = $this->createSoal($deskripsiSoal);
-            $this->saveNodeToDatabase($id_soal, $listNode);
-            $listConnect = array();
-            foreach ($listEdge as $el) {
-                array_push($listConnect, $this->connectEdge($el));
-            }
+                $listConnect = array();
+                foreach ($listEdge as $el) {
+                    array_push($listConnect, $this->connectEdge($el));
+                }
+                $message = $this->LSoal->createSoal($kode_topik, $deskripsiSoal, ['node' => $listNode, 'edge' => $listConnect, 'directional' => $directional], $bentukSoal);
 
-            foreach ($listConnect as $el) {
-                $this->saveEdgeToDatabase($id_soal, $el);
-            }
+                $response = array(
+                    "deskripsi" => $deskripsiSoal,
+                    "node" => $listNode,
+                    "edge" => $listEdge,
+                    "connect" => $listConnect,
+                    "directional" => $directional,
+                    "message" => $message
+                );
+                break;
+            case "membuat-graf-euler":
+                $deskripsiSoal = $this->input->post("deskripsiSoal");
+                $listNode = $this->input->post("listNode");
 
-            $response = array(
-                "deskripsi" => $deskripsiSoal,
-                "node" => $listNode,
-                "edge" => $listEdge,
-                "connect" => $listConnect
-            );
+                $listNode = $this->getNode($listNode);
+                $message = $this->LSoal->createSoal($kode_topik, $deskripsiSoal, ['node' => $listNode, 'edge' => $listConnect], $bentukSoal);
 
-            echo json_encode($response);
-            return true;
+                $response = array(
+                    "deskripsi" => $deskripsiSoal,
+                    "node" => $listNode,
+                    "message" => $message
+                );
+                break;
+            case "drag-and-drop":
+                $deskripsiSoal = $this->input->post("deskripsiSoal");
+                $dataSoalGraf = $this->input->post("dataSoalGraf");
+                $dataSoalNode = $this->input->post("dataSoalNode");
+                $dataSoalEdge = $this->input->post('dataSoalEdge');
+
+                $graf = $this->getDragAndDrop($dataSoalGraf, "graf");
+                $node = $this->getDragAndDrop($dataSoalNode, "node");
+                $edge = $this->getDragAndDrop($dataSoalEdge, "edge");
+
+
+
+                $message = $this->LSoal->createSoal($kode_topik, $deskripsiSoal, array_merge($graf, $node, $edge), $bentukSoal);
+
+                $response = array(
+                    "deskripsi" => $deskripsiSoal,
+                    "data" => array_merge($graf, $node, $edge),
+                    "message" => $message
+                );
+                break;
+            case "membuat-matriks":
+                $deskripsiSoal = $this->input->post("deskripsiSoal");
+                $listNode = $this->input->post("listNode");
+                $listEdge = $this->input->post('listEdge');
+                $directional = $this->input->post('directional');
+
+                $listNode = $this->getNode($listNode);
+                $listEdge = $this->getEdge($listEdge);
+
+                $listConnect = array();
+                foreach ($listEdge as $el) {
+                    array_push($listConnect, $this->connectEdge($el));
+                }
+                $message = $this->LSoal->createSoal($kode_topik, $deskripsiSoal, ['node' => $listNode, 'edge' => $listConnect, 'directional' => $directional], $bentukSoal);
+
+                $response = array(
+                    "deskripsi" => $deskripsiSoal,
+                    "node" => $listNode,
+                    "edge" => $listEdge,
+                    "connect" => $listConnect,
+                    "directional" => $directional,
+                    "message" => $message
+                );
+                break;
+            case "pilih-node":
+                $deskripsiSoal = $this->input->post("deskripsiSoal");
+                $listNode = $this->input->post("listNode");
+                $listEdge = $this->input->post('listEdge');
+                $directional = $this->input->post('directional');
+
+                $listNode = $this->getNode($listNode);
+                $listEdge = $this->getEdge($listEdge);
+
+                $listConnect = array();
+                foreach ($listEdge as $el) {
+                    array_push($listConnect, $this->connectEdge($el));
+                }
+                $message = $this->LSoal->createSoal($kode_topik, $deskripsiSoal, ['node' => $listNode, 'edge' => $listConnect, 'directional' => $directional], $bentukSoal);
+
+                $response = array(
+                    "deskripsi" => $deskripsiSoal,
+                    "node" => $listNode,
+                    "edge" => $listEdge,
+                    "connect" => $listConnect,
+                    "directional" => $directional,
+                    "message" => $message
+                );
+                break;
+            case "isian-array":
+                $deskripsiSoal = $this->input->post("deskripsiSoal");
+                $listNode = $this->input->post("listNode");
+                $listEdge = $this->input->post('listEdge');
+                $directional = $this->input->post('directional');
+
+                $listNode = $this->getNode($listNode);
+                $listEdge = $this->getEdge($listEdge);
+
+                $listConnect = array();
+                foreach ($listEdge as $el) {
+                    array_push($listConnect, $this->connectEdge($el));
+                }
+                $message = $this->LSoal->createSoal($kode_topik, $deskripsiSoal, ['node' => $listNode, 'edge' => $listConnect, 'directional' => $directional], $bentukSoal);
+
+                $response = array(
+                    "deskripsi" => $deskripsiSoal,
+                    "node" => $listNode,
+                    "edge" => $listEdge,
+                    "connect" => $listConnect,
+                    "directional" => $directional,
+                    "message" => $message
+                );
+                break;
         }
+
+        echo json_encode($response);
+        return true;
     }
 
     private function getNode($node)
@@ -54,7 +169,28 @@ class API extends CI_Controller
             array_push($arr_ret, trim($el));
         }
 
-        return $arr_ret;
+        $arr_insert = array();
+        $posx = 25;
+        $posy = 100;
+        $iterate = 1;
+        foreach ($arr_ret as $el) {
+            $arr = array(
+                "posx" => $posx,
+                "posy" => $iterate % 2 == 0 ? $posy - 20 : $posy,
+                "text" => $el
+            );
+            array_push($arr_insert, $arr);
+
+            if ($posx <= 750) {
+                $posx += 50;
+            } else {
+                $posx = 25;
+                $posy += 50;
+            }
+            $iterate++;
+        }
+
+        return $arr_insert;
     }
 
     private function getEdge($edge)
@@ -88,59 +224,32 @@ class API extends CI_Controller
         return $arr_ret;
     }
 
-    private function createSoal($deskripsi)
+    private function getDragAndDrop($data, $bentuk)
     {
-        return $this->LSoal->createSoal(["soal" => $deskripsi]);
-    }
-
-    private function saveNodeToDatabase($id_soal, $node)
-    {
-        $arr_insert = array();
-        $posx = 25;
-        $posy = 100;
-        $iterate = 1;
-        foreach ($node as $el) {
-            $arr = array(
-                "id_soal" => $id_soal,
-                "posx" => $posx,
-                "posy" => $iterate % 2 == 0 ? $posy - 20 : $posy,
-                "text" => $el
-            );
-            array_push($arr_insert, $arr);
-
-            if ($posx <= 750) {
-                $posx += 50;
-            } else {
-                $posx = 25;
-                $posy += 50;
-            }
-            $iterate++;
+        $ret_array = array();
+        foreach ($this->explodeArray($data) as $el) {
+            array_push($ret_array, array(
+                "text" => $el,
+                "bentuk" => $bentuk
+            ));
         }
 
-        $this->LSoal->createNodeGraf($arr_insert);
+        return $ret_array;
     }
 
-    private function saveEdgeToDatabase($id_soal, $edge)
+    private function explodeArray($data)
     {
-        $id_edge = array();
-        foreach ($edge as $el) {
-            $id_node = $this->LSoal->getNodeGrafByIdSoalAndText($id_soal, $el);
-            if (!$id_node['id']) {
-                echo json_encode(["message" => "error, node \"" . $el . "\" tidak ada. Cek kembali list node dan edge"]);
-                die();
-            }
+        $start = strpos($data, "{");
+        $end = strpos($data, "}", $start + 1);
+        $len = $end - $start;
+        $listdata = substr($data, $start + 1, $len - 1);
+        $arrdata = explode(",", $listdata);
 
-            array_push($id_edge, $id_node['id']);
+        $arr_ret = array();
+        foreach ($arrdata as $el) {
+            array_push($arr_ret, trim($el));
         }
 
-        $arr_insert = array(
-            "id_soal" => $id_soal,
-            "start_node_id" => $id_edge[0],
-            "end_node_id" => $id_edge[1],
-            "directional" => false,
-            "kunci" => null
-        );
-
-        $this->LSoal->createEdgeGraf($arr_insert);
+        return $arr_ret;
     }
 }
