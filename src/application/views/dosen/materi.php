@@ -21,25 +21,69 @@
 			<tr>
 				<th>#</th>
 				<th>Soal</th>
-				<th>Aksi</th>
+				<th class="text-center">Aksi</th>
 			</tr>
 			<?php $i = 1;
 			foreach ($listSoal as $el) { ?>
 				<tr>
-					<td><?php echo $i ?></td>
+					<th><?php echo $i ?></th>
 					<td><?php echo $el['soal'] ?></td>
-					<td><button class="btn btn-primary" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalKunciJawaban">Tambah Kunci Jawaban</button></td>
+					<td class="text-center">
+						<button class="btn btn-primary" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalKunciJawaban">Kunci Jawaban</button>
+						<button class="btn btn-info" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalEditSoal">Edit</button>
+						<button class="btn btn-danger" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalHapusSoal">Hapus</button>
+					</td>
+
 				</tr>
 			<?php $i++;
 			} ?>
 		</table>
 	</div>
 
-	<div class="modal fale" id="modalKunciJawaban" tabindex="-1">
+	<div class="modal fade" id="modalHapusSoal" tabindex="-1">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">Buat Soal</h5>
+					<h5 class="modal-title">Hapus Soal</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<h5>Apa anda yakin akan menghapus soal ini?</h5>
+					<span>Soal tidak bisa dihapus jika sudah diisi oleh pengguna.</span>
+					<div class="w-100 text-right">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
+						<button type="button" class="btn btn-danger" id="hapusSoalButton">Ya, Hapus</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modalEditSoal" tabindex="-1">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Edit Soal</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="modalBodyEditSoal"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="saveEditSoal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modalKunciJawaban" tabindex="-1">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Kunci Jawaban</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -83,94 +127,7 @@
 							<label for="deskripsiSoal">Deskripsi Soal</label>
 							<textarea id="deskripsiSoal" name="deskripsiSoal" class="form-control"></textarea>
 						</div>
-						<div class="d-none" id="soalMembuatGraf">
-							<h5>Membuat Graf</h5>
-							<div class="form-group">
-								<label for="listNode">Array Node</label>
-								<input type="text" class="form-control" name="listNode1" id="listNode1" placeholder="{A, B, C}" />
-							</div>
-							<div class="form-group">
-								<label for="listEdge">Array Edge</label>
-								<input type="text" class="form-control" name="listEdge1" id="listEdge1" placeholder="{(A, B); (A, C); (B, C)}" />
-							</div>
-							<div class="custom-control custom-switch">
-								<input type="checkbox" class="custom-control-input" id="toggle-directional1">
-								<label class="custom-control-label" for="toggle-directional1">Directional</label>
-							</div>
-						</div>
-
-						<div class="d-none" id="soalMembuatGrafEuler">
-							<h5>Membuat Graf Euler</h5>
-							<div class="form-group">
-								<label for="listNode2">Array Node</label>
-								<input type="text" class="form-control" name="listNode2" id="listNode2" placeholder="{A, B, C}" />
-							</div>
-						</div>
-
-						<div class="d-none" id="soalDragAndDrop">
-							<h5>Membuat soal Drag and Drop</h5>
-							<div class="form-group">
-								<label for="listGraf3">List Graf</label>
-								<input type="text" class="form-control" name="listGraf3" id="listGraf3" placeholder="{A, B, C}" />
-							</div>
-							<div class="form-group">
-								<label for="listNode3">List Node</label>
-								<input type="text" class="form-control" name="listNode3" id="listNode3" placeholder="{A, B, C}" />
-							</div>
-							<div class="form-group">
-								<label for="listEdge3">List Edge</label>
-								<input type="text" class="form-control" name="listEdge3" id="listEdge3" placeholder="{A, B, C}" />
-							</div>
-						</div>
-
-						<div class="d-none" id="soalMembuatMatriks">
-							<!-- <table class="table" id="matrixTable"></table> -->
-							<h5>Membuat Tabel Matriks</h5>
-							<div class="form-group">
-								<label for="listNode">Array Node</label>
-								<input type="text" class="form-control" name="listNode4" id="listNode4" placeholder="{A, B, C}" />
-							</div>
-							<div class="form-group">
-								<label for="listEdge">Array Edge</label>
-								<input type="text" class="form-control" name="listEdge4" id="listEdge4" placeholder="{(A, B); (A, C); (B, C)}" />
-							</div>
-							<div class="custom-control custom-switch">
-								<input type="checkbox" class="custom-control-input" id="toggle-directional4">
-								<label class="custom-control-label" for="toggle-directional4">Directional</label>
-							</div>
-						</div>
-
-						<div class="d-none" id="soalMemilihNode">
-							<h5>Memilih Node</h5>
-							<div class="form-group">
-								<label for="listNode">Array Node</label>
-								<input type="text" class="form-control" name="listNode5" id="listNode5" placeholder="{A, B, C}" />
-							</div>
-							<div class="form-group">
-								<label for="listEdge">Array Edge</label>
-								<input type="text" class="form-control" name="listEdge5" id="listEdge5" placeholder="{(A, B); (A, C); (B, C)}" />
-							</div>
-							<div class="custom-control custom-switch">
-								<input type="checkbox" class="custom-control-input" id="toggle-directional5">
-								<label class="custom-control-label" for="toggle-directional5">Directional</label>
-							</div>
-						</div>
-
-						<div class="d-none" id="soalIsian">
-							<h5>Membuat array</h5>
-							<div class="form-group">
-								<label for="listNode">Array Node</label>
-								<input type="text" class="form-control" name="listNode6" id="listNode6" placeholder="{A, B, C}" />
-							</div>
-							<div class="form-group">
-								<label for="listEdge">Array Edge</label>
-								<input type="text" class="form-control" name="listEdge6" id="listEdge6" placeholder="{(A, B); (A, C); (B, C)}" />
-							</div>
-							<div class="custom-control custom-switch">
-								<input type="checkbox" class="custom-control-input" id="toggle-directional6">
-								<label class="custom-control-label" for="toggle-directional6">Directional</label>
-							</div>
-						</div>
+						<div id="divSoalCustom"></div>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -218,89 +175,89 @@
 
 	let bentukSoal = document.getElementById("bentukSoal");
 
-	let lastSoalValue = null;
+	// let lastSoalValue = null;
 
 	$("#bentukSoal").on("change", (event) => {
-		if (lastSoalValue != null) lastSoalValue.classList.add("d-none");
-		switch (event.target.value) {
-			case "membuat-graf":
-				lastSoalValue = document.getElementById("soalMembuatGraf");
-				break;
-			case "membuat-graf-euler":
-				lastSoalValue = document.getElementById("soalMembuatGrafEuler");
-				break;
-			case "drag-and-drop":
-				lastSoalValue = document.getElementById("soalDragAndDrop");
-				break;
-			case "membuat-matriks":
-				lastSoalValue = document.getElementById("soalMembuatMatriks");
-				break;
-			case "pilih-node":
-				lastSoalValue = document.getElementById("soalMemilihNode");
-				break;
-			case "isian-array":
-				lastSoalValue = document.getElementById("soalIsian");
-				break;
-			default:
-				break;
-		}
+		let divSoalCustom = document.getElementById("divSoalCustom");
+		divSoalCustom.innerHTML = "";
+		if (event.target.value != "drag-and-drop") {
+			let heading5 = document.createElement("h5");
+			heading5.appendChild(document.createTextNode(event.target.selectedOptions[0].text));
 
-		lastSoalValue.classList.remove("d-none");
+			let divFormGroupArray = document.createElement("div");
+			divFormGroupArray.setAttribute("class", "form-group");
+
+			let labelFormArray = document.createElement("label");
+			labelFormArray.setAttribute("for", "listNode." + event.target.value);
+			labelFormArray.appendChild(document.createTextNode("Array Node"));
+			let inputFormArray = document.createElement("input");
+			inputFormArray.setAttribute("type", "text");
+			inputFormArray.setAttribute("class", "form-control");
+			inputFormArray.setAttribute("placeholder", "{A, B, C}")
+			inputFormArray.id = "listNode." + event.target.value;
+
+			divSoalCustom.appendChild(heading5);
+			divFormGroupArray.appendChild(labelFormArray);
+			divFormGroupArray.appendChild(inputFormArray);
+			divSoalCustom.appendChild(divFormGroupArray);
+		} else {
+			let heading5 = document.createElement("h5");
+			heading5.appendChild(document.createTextNode(event.target.selectedOptions[0].text));
+			divSoalCustom.appendChild(heading5);
+
+			for (let i = 0; i < 3; i++) {
+				let textInput = "";
+				switch (i) {
+					case 0:
+						textInput = "Graf";
+						break;
+					case 1:
+						textInput = "Node";
+						break;
+					case 2:
+						textInput = "Edge";
+						break;
+					default:
+						break;
+				}
+
+				let divFormGroupArray = document.createElement("div");
+				divFormGroupArray.setAttribute("class", "form-group");
+
+				let labelFormArray = document.createElement("label");
+				labelFormArray.setAttribute("for", "list" + textInput + "." + event.target.value);
+				labelFormArray.appendChild(document.createTextNode("Array " + textInput));
+				let inputFormArray = document.createElement("input");
+				inputFormArray.setAttribute("type", "text");
+				inputFormArray.setAttribute("class", "form-control");
+				inputFormArray.setAttribute("placeholder", "{A, B, C}")
+				inputFormArray.id = "list" + textInput + "." + event.target.value
+
+				divFormGroupArray.appendChild(labelFormArray);
+				divFormGroupArray.appendChild(inputFormArray);
+				divSoalCustom.appendChild(divFormGroupArray);
+			}
+		}
 	})
 
 	$("#saveSoalButton").on("click", () => {
 		let bentukSoal = $("#bentukSoal").val();
 		let data = {};
-		switch (bentukSoal) {
-			case "membuat-graf":
-				data = {
-					deskripsiSoal: $("#deskripsiSoal").val(),
-					listNode: $("#listNode1").val(),
-					listEdge: $("#listEdge1").val(),
-					directional: document.getElementById("toggle-directional1").checked
-				}
-				break;
-			case "membuat-graf-euler":
-				data = {
-					deskripsiSoal: $("#deskripsiSoal").val(),
-					listNode: $("#listNode2").val(),
-				}
-				break;
-			case "drag-and-drop":
-				data = {
-					deskripsiSoal: $("#deskripsiSoal").val(),
-					dataSoalGraf: $("#listGraf3").val(),
-					dataSoalNode: $("#listNode3").val(),
-					dataSoalEdge: $("#listEdge3").val()
-				}
-				break;
-			case "membuat-matriks":
-				data = {
-					deskripsiSoal: $("#deskripsiSoal").val(),
-					listNode: $("#listNode4").val(),
-					listEdge: $("#listEdge4").val(),
-					directional: document.getElementById("toggle-directional4").checked
-				}
-				break;
-			case "pilih-node":
-				data = {
-					deskripsiSoal: $("#deskripsiSoal").val(),
-					listNode: $("#listNode5").val(),
-					listEdge: $("#listEdge5").val(),
-					directional: document.getElementById("toggle-directional5").checked
-				}
-				break;
-			case "isian-array":
-				data = {
-					deskripsiSoal: $("#deskripsiSoal").val(),
-					listNode: $("#listNode6").val(),
-					listEdge: $("#listEdge6").val(),
-					directional: document.getElementById("toggle-directional6").checked
-				}
-				break;
-			default:
-				break;
+		if (bentukSoal != "drag-and-drop") {
+			data = {
+				deskripsiSoal: $("#deskripsiSoal").val(),
+				listNode: $("#listNode." + bentukSoal).val(),
+			}
+		} else {
+			data = {
+				deskripsiSoal: $("#deskripsiSoal").val(),
+				dataSoalGraf: $("#listGraf." + bentukSoal).val(),
+				dataSoalNode: $("#listNode." + bentukSoal).val(),
+				dataSoalEdge: $("#listEdge." + bentukSoal).val()
+			}
 		}
+
+		// TODO: implement isian
 
 		$.ajax({
 				method: "POST",
@@ -317,7 +274,7 @@
 			});
 	})
 
-	function populateMatrix(node) {
+	function populateMatrix(node, bentukSoal) {
 		let table = document.createElement("table");
 		table.id = "matrixTable";
 		table.setAttribute("class", "table table-bordered");
@@ -338,12 +295,22 @@
 					let checkbox = document.createElement("input");
 					checkbox.setAttribute("type", "checkbox");
 					col.appendChild(checkbox);
-					checkbox.id = "check" + node[i - 1].id + "." + node[j - 1].id
+					checkbox.id = "check." + node[i - 1].id + "." + node[j - 1].id
 					checkbox.onchange = function(event) {
-						kunciJawabanForm.data["check" + node[i - 1].id + "." + node[j - 1].id] = event.target.checked;
+						if (event.target.checked == true) {
+							kunciJawabanForm.data.push({
+								id_soal: node[i - 1].id_soal,
+								checkbox_id: event.target.id,
+								start_node: node[i - 1].id,
+								end_node: node[j - 1].id,
+								directional: false
+							});
+						} else {
+							kunciJawabanForm.data = kunciJawabanForm.data.filter((val) => {
+								return val.checkbox_id != event.target.id
+							});
+						}
 					}
-					// col.appendChild(document.createTextNode("*"));
-					// col.appendChild(document.createTextNode(" "));
 				}
 
 				row.appendChild(col);
@@ -352,20 +319,41 @@
 			table.appendChild(row);
 		}
 
+		fetch("<?php echo site_url("API/getKunciJawaban/") ?>" + node[0].id_soal + "/" + bentukSoal)
+			.then(res => res.json())
+			.then(data => {
+				if (data.length != 0) {
+					data.forEach(el => {
+						let checkbox = document
+							.getElementById('check.' + el.start_node_id + "." + el.end_node_id).checked = true;
+					})
+				}
+			});
+
 		return table;
 	}
 
-	function populateDrag(data) {
+	function populateDrag(data, bentukSoal) {
 		let table = document.createElement("table");
 		table.id = "matrixTable";
 		table.setAttribute("class", "table");
 		table.innerHTML = "";
-
 		for (let i = 0; i < data.graf.length + 1; i++) {
 			let row = document.createElement("tr");
 
 			for (let j = 0; j < 3; j++) {
 				let col = document.createElement("td");
+
+				let placeholderOptionNode = document.createElement("option");
+				placeholderOptionNode.setAttribute("selected", true);
+				placeholderOptionNode.setAttribute("disabled", true);
+				placeholderOptionNode.appendChild(document.createTextNode("Pilih Kunci Jawaban Node"));
+
+				let placeholderOptionEdge = document.createElement("option");
+				placeholderOptionEdge.setAttribute("selected", true);
+				placeholderOptionEdge.setAttribute("disabled", true);
+				placeholderOptionEdge.appendChild(document.createTextNode("Pilih Kunci Jawaban Edge"));
+
 				if (i == 0) {
 					if (j == 0) {
 						col.appendChild(document.createTextNode("Graf"));
@@ -379,8 +367,19 @@
 					node.setAttribute("class", "form-control");
 					node.id = "pilihNode" + data.graf[i - 1].id;
 					node.onchange = function(event) {
-						kunciJawabanForm.data["node" + data.graf[i - 1].id] = event.target.value;
+						let index = kunciJawabanForm.data.findIndex(el => el.id_text_graf == data.graf[i - 1].id);
+						if (index >= 0) {
+							kunciJawabanForm.data[index].id_text_node = event.target.value;
+						} else {
+							kunciJawabanForm.data.push({
+								id_soal: data.graf[i - 1].id_soal,
+								id_text_graf: data.graf[i - 1].id,
+								id_text_node: event.target.value,
+								id_text_edge: null
+							});
+						}
 					}
+					node.appendChild(placeholderOptionNode);
 					data.node.forEach(el => {
 						let option = document.createElement("option");
 						option.value = el.id
@@ -390,10 +389,21 @@
 
 					let edge = document.createElement("select");
 					edge.setAttribute("class", "form-control");
-					edge.id = "pilihedge" + data.graf[i - 1].id;
+					edge.id = "pilihEdge" + data.graf[i - 1].id;
 					edge.onchange = function(event) {
-						kunciJawabanForm.data["edge" + data.graf[i - 1].id] = event.target.value;
+						let index = kunciJawabanForm.data.findIndex(el => el.id_text_graf == data.graf[i - 1].id);
+						if (index >= 0) {
+							kunciJawabanForm.data[index].id_text_edge = event.target.value;
+						} else {
+							kunciJawabanForm.data.push({
+								id_soal: data.graf[i - 1].id_soal,
+								id_text_graf: data.graf[i - 1].id,
+								id_text_node: null,
+								id_text_edge: event.target.value
+							});
+						}
 					}
+					edge.appendChild(placeholderOptionEdge);
 					data.edge.forEach(el => {
 						let option = document.createElement("option");
 						option.value = el.id
@@ -414,6 +424,20 @@
 
 			table.appendChild(row);
 		}
+		fetch("<?php echo site_url("API/getKunciJawaban/") ?>" + data.graf[0].id_soal + "/" + bentukSoal)
+			.then(res => res.json())
+			.then(data => {
+				if (data.length != 0) {
+
+					data.forEach(el => {
+						document
+							.getElementById('pilihNode' + el.id_text_graf).value = el.id_text_node;
+
+						document
+							.getElementById('pilihEdge' + el.id_text_graf).value = el.id_text_edge;
+					});
+				}
+			});
 
 		return table;
 	}
@@ -423,7 +447,6 @@
 		fetch("<?php echo site_url('API/getSoalById/') ?>" + soalid)
 			.then(res => res.json())
 			.then(data => {
-				console.log(data);
 				document.getElementById("deskripsiSoalKunciJawaban").innerHTML = data.soal;
 				let formKunci = document.getElementById("formKunciJawaban") || document.createElement("form");
 				formKunci.id = "formKunciJawaban";
@@ -433,10 +456,10 @@
 						graf: data.graf,
 						node: data.node,
 						edge: data.edge
-					});
+					}, data.bentuk_soal);
 					formKunci.appendChild(table);
 				} else {
-					let table = populateMatrix(data.node);
+					let table = populateMatrix(data.node, data.bentuk_soal);
 					formKunci.appendChild(table);
 				}
 				kunciJawabanForm.bentukSoal = data.bentuk_soal;
@@ -446,7 +469,10 @@
 	$("#modalKunciJawaban").on("hide.bs.modal", function(event) {
 		document.getElementById("deskripsiSoalKunciJawaban").innerHTML = "";
 		document.getElementById("formKunciJawaban").remove();
-		kunciJawabanForm = [];
+		kunciJawabanForm = {
+			bentukSoal: null,
+			data: []
+		};
 	})
 
 	let kunciJawabanForm = {
@@ -455,9 +481,23 @@
 	};
 
 	$("#saveKunciJawaban").on("click", function() {
-		console.log(kunciJawabanForm.bentukSoal)
-		if (kunciJawabanForm.bentukSoal === 'drag-and-drop') {
-			console.log(kunciJawabanForm);
-		}
+		let data = {
+			bentukSoal: kunciJawabanForm.bentukSoal,
+			dataKunci: kunciJawabanForm.data
+		};
+
+		$.ajax({
+				method: "POST",
+				url: "<?php echo site_url('API/saveKunciJawaban/') ?>",
+				data: data
+			})
+			.done(function(res) {
+				console.log(res);
+				if (res.message != "success") {
+					alert("Gagal input, cek kembali array node dan graf agar sesuai format");
+				} else {
+					$("#modalKunciJawaban").modal('toggle');
+				}
+			});
 	})
 </script>

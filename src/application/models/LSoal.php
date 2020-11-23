@@ -137,6 +137,28 @@ class LSoal extends CI_Model
         }
     }
 
+    public function saveKunciJawaban($data)
+    {
+        $this->db->insert_batch("kunci_jawaban_edge_graf", $data);
+    }
+
+    public function saveKunciJawabanDrag($data)
+    {
+        $this->db->insert_batch("kunci_jawaban_graf_text", $data);
+    }
+
+    public function getKunciJawaban($id_soal)
+    {
+        $this->db->where("id_soal", $id_soal);
+        return $this->db->get("kunci_jawaban_edge_graf")->result_array();
+    }
+
+    public function getKunciJawabanDrag($id_soal)
+    {
+        $this->db->where("id_soal", $id_soal);
+        return $this->db->get("kunci_jawaban_graf_text")->result_array();
+    }
+
     public function getNodeGraf()
     {
         return $this->db->get("node_graf")->result_array();
