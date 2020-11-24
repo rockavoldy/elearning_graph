@@ -1,7 +1,7 @@
 <script src="<?php echo base_url('assets/js/Graphs.js') ?>"></script>
 <script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
 <div class="d-flex flex-wrap">
-	<div class="col-xl-12 col-lg-7">
+	<div class="col-12 ">
 		<div class="card shadow mb-4">
 			<!-- Card Body -->
 			<div class="card-body">
@@ -12,7 +12,7 @@
 			<!-- /.container-fluid -->
 		</div>
 	</div>
-	<div class="col-xl-12 col-lg-7">
+	<div class="col-12 ">
 		<div class="card shadow px-3 py-4">
 			<h4>Tugas</h4>
 			<style>
@@ -76,7 +76,7 @@
 							elTugas.appendChild(divSoal);
 						} else {
 							// buttonSaveJawaban.id = "button-graf-interaktif";
-							buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id)
+							buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id, el.bentuk_soal)
 
 
 							let canvas = document.createElement("canvas");
@@ -97,8 +97,6 @@
 							divSoalButton.appendChild(buttonSaveJawaban);
 							divSoal.appendChild(divSoalButton);
 						}
-
-
 						// console.log(el);
 					})
 				});
@@ -106,7 +104,7 @@
 			let arrGraph = [];
 
 			// function to save jawaban
-			function saveJawabanGraf(id_soal) {
+			function saveJawabanGraf(id_soal, bentukSoal) {
 				let dataaa = createdNode.find(el => el.id_soal == id_soal);
 
 				let kirim = [];
@@ -118,7 +116,7 @@
 					Object.entries(edges).forEach(([keey, ell]) => {
 						kirim.push({
 							id_soal: id_soal,
-							id_mhs: <?php echo $this->session->userdata('id'); ?>,
+							// id_mhs: <?php echo $this->session->userdata('id'); ?>,
 							start_node_id: dataaa.data.find(elll => elll.nodeId == ell.startNodeid).id,
 							end_node_id: dataaa.data.find(elll => elll.nodeId == ell.endNodeid).id,
 							bobot: 0,
@@ -126,7 +124,8 @@
 						});
 					})
 				}
-				// console.log(kirim)
+				console.log(kirim);
+				kirimJawaban(id_soal, bentukSoal, kirim)
 			}
 
 			let arrDrag = [];
@@ -134,12 +133,28 @@
 
 			function saveJawabanDrag(id_soal) {
 				console.log(arrDrag);
+				kirimJawaban(id_soal, "drag-and-drop", arrDrag);
 			}
 
 			let arrMatriks = [];
 
 			function saveJawabanMatriks(id_soal) {
 				console.log(arrMatriks)
+			}
+
+			function kirimJawaban(id_soal, bentukSoal, dataKirim) {
+				let data = {
+					bentukSoal: bentukSoal,
+					dataJawaban: dataKirim
+				}
+				$.ajax({
+						method: "POST",
+						url: "<?php echo site_url('API/saveJawabanSiswa/') ?>" + id_soal,
+						data: data
+					})
+					.done(function(res) {
+						console.log(res);
+					});
 			}
 
 			// graf interactive
@@ -197,7 +212,7 @@
 
 			function populateDrop(data) {
 				const elDrag = document.createElement("div");
-				elDrag.setAttribute("class", "col-12 d-flex flex-wrap border border-dark");
+				elDrag.setAttribute("class", "draggable col-12 d-flex flex-wrap border border-dark");
 				elDrag.id = "graf-pilihan";
 
 				data.forEach(el => {
@@ -287,8 +302,8 @@
 					interact("#graf-" + el.id)
 						.dropzone({
 							ondrop: function(event) {
-								console.log(event.target.id); //dropbox (graf)
-								console.log(event.relatedTarget.id); //draggable item (node or edge)
+								// console.log(event.target.id); //dropbox (graf)
+								// console.log(event.relatedTarget.id); //draggable item (node or edge)
 
 								arrDrag = arrDrag.filter(el => el.id_jawaban != event.relatedTarget.id.split("-")[1]);
 								arrDrag.push({
@@ -298,17 +313,10 @@
 								})
 								console.log(arrDrag)
 							}
-
 						})
 						.on('dropactivate', function(event) {
 							event.target.classList.add('drop-activated');
 						})
-					interact("#graf-pilihan").dropzone({
-						ondrop: function(event) {
-							console.log("delete this shit")
-							console.log(arrDrag)
-						}
-					})
 				})
 			}
 
@@ -328,7 +336,7 @@
 					interact("#drop-" + el.id).draggable({
 						listeners: {
 							start(event) {
-								console.log(event.type, event.target)
+								// console.log(event.type, event.target)
 							},
 							move(event) {
 								arrDrop["drop-" + el.id].position.x += event.dx

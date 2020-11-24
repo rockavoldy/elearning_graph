@@ -124,6 +124,72 @@ class API extends CI_Controller
         return true;
     }
 
+    public function saveJawabanSiswa($id_soal)
+    {
+        header("Content-Type: application/json");
+        $bentukSoal = $this->input->post("bentukSoal");
+        $dataJawaban = $this->input->post("dataJawaban");
+        $id_mhs = $this->session->userdata("id");
+
+        $response = "";
+
+        if ($bentukSoal == "drag-and-drop") {
+            $response = array(
+                "message" => "success",
+                "nilai" => 0,
+                "data" => $dataJawaban
+            );
+        } else if ($bentukSoal == "membuat-graf") {
+            $response = array(
+                "message" => "success",
+                "nilai" => 0,
+                "data" => $dataJawaban
+            );
+        }
+
+        echo json_encode($response);
+        return true;
+    }
+
+    private function checkJawabanGraf($idSoal, $dataJawaban, $idMhs, $bentukSoal)
+    {
+        $kirim = array();
+        foreach ($dataJawaban as $el) {
+            array_push($kirim, array(
+                "bobot" => $el['bobot'],
+                "directional" => $el['directional'],
+                "end_node_id" => $el['end_node_id'],
+                "start_node_id" => $el['start_node_id'],
+                "id_mhs" => $idMhs,
+                "id_soal" => $idSoal,
+            ));
+        }
+
+        $this->LSoal->saveJawabanSiswa($kirim, $bentukSoal);
+    }
+
+    private function checkJawabanDrag($idSoal, $dataJawaban, $idMhs)
+    {
+        $kunciJawaban = $this->LSoal->getKunciJawabanDrag($idSoal);
+        $ret_array = array();
+
+        foreach ($dataJawaban as $jawaban) {
+            $idxKunci = 0;
+            for ($i = 0; $i < sizeof($kunciJawaban); $i++) {
+                if ($jawaban['id_text_graf'] == $kunciJawaban[$i]["id_text_graf"]) {
+                    $idxKunci = $i;
+                    break;
+                }
+            }
+
+            if ($jawaban['id_jawaban'] == $kunciJawaban[$idxKunci]["id_text_node"]) {
+                array_push($ret_array, array(
+                    ""
+                ));
+            }
+        }
+    }
+
     private function getNode($node)
     {
         $start = strpos($node, "{");

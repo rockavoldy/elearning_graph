@@ -90,6 +90,13 @@ class LSoal extends CI_Model
         return $ret_array;
     }
 
+    public function saveJawabanSiswa($data, $bentukSoal)
+    {
+        if ($bentukSoal == "membuat-graf") {
+            $this->db->insert_batch("jawaban_edge_graf", $data);
+        }
+    }
+
     public function createSoal($kode_topik, $deskripsi, $data, $bentukSoal)
     {
         // begin transaction
