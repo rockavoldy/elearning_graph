@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db:3306
--- Generation Time: Nov 23, 2020 at 08:09 AM
+-- Generation Time: Nov 24, 2020 at 05:14 PM
 -- Server version: 10.2.36-MariaDB-1:10.2.36+maria~bionic
 -- PHP Version: 7.4.12
 
@@ -617,9 +617,9 @@ ALTER TABLE `akses`
 -- Constraints for table `edge_graf`
 --
 ALTER TABLE `edge_graf`
-  ADD CONSTRAINT `edge_graf_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`),
-  ADD CONSTRAINT `edge_graf_ibfk_2` FOREIGN KEY (`start_node_id`) REFERENCES `node_graf` (`id`),
-  ADD CONSTRAINT `edge_graf_ibfk_3` FOREIGN KEY (`end_node_id`) REFERENCES `node_graf` (`id`);
+  ADD CONSTRAINT `edge_graf_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `edge_graf_ibfk_2` FOREIGN KEY (`start_node_id`) REFERENCES `node_graf` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `edge_graf_ibfk_3` FOREIGN KEY (`end_node_id`) REFERENCES `node_graf` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `jawaban_edge_graf`
@@ -655,30 +655,30 @@ ALTER TABLE `konten`
 -- Constraints for table `kunci_jawaban_edge_graf`
 --
 ALTER TABLE `kunci_jawaban_edge_graf`
-  ADD CONSTRAINT `kunci_jawaban_edge_graf_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`),
-  ADD CONSTRAINT `kunci_jawaban_edge_graf_ibfk_2` FOREIGN KEY (`start_node_id`) REFERENCES `node_graf` (`id`),
-  ADD CONSTRAINT `kunci_jawaban_edge_graf_ibfk_3` FOREIGN KEY (`end_node_id`) REFERENCES `node_graf` (`id`);
+  ADD CONSTRAINT `kunci_jawaban_edge_graf_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `kunci_jawaban_edge_graf_ibfk_2` FOREIGN KEY (`start_node_id`) REFERENCES `node_graf` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `kunci_jawaban_edge_graf_ibfk_3` FOREIGN KEY (`end_node_id`) REFERENCES `node_graf` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `kunci_jawaban_graf_text`
 --
 ALTER TABLE `kunci_jawaban_graf_text`
-  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`),
-  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_2` FOREIGN KEY (`id_text_edge`) REFERENCES `soal_graf_text` (`id`),
-  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_3` FOREIGN KEY (`id_text_graf`) REFERENCES `soal_graf_text` (`id`),
-  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_4` FOREIGN KEY (`id_text_node`) REFERENCES `soal_graf_text` (`id`);
+  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_2` FOREIGN KEY (`id_text_edge`) REFERENCES `soal_graf_text` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_3` FOREIGN KEY (`id_text_graf`) REFERENCES `soal_graf_text` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `kunci_jawaban_graf_text_ibfk_4` FOREIGN KEY (`id_text_node`) REFERENCES `soal_graf_text` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `node_graf`
 --
 ALTER TABLE `node_graf`
-  ADD CONSTRAINT `node_graf_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`);
+  ADD CONSTRAINT `node_graf_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `soal_graf_text`
 --
 ALTER TABLE `soal_graf_text`
-  ADD CONSTRAINT `soal_graf_text_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`);
+  ADD CONSTRAINT `soal_graf_text_ibfk_1` FOREIGN KEY (`id_soal`) REFERENCES `soal` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
