@@ -142,6 +142,27 @@ class LSoal extends CI_Model
         $this->db->insert_batch("kunci_jawaban_edge_graf", $data);
     }
 
+    public function delKunciJawaban($data)
+    {
+        $this->db->where("id_soal", $data['id_soal']);
+        $this->db->where("start_node_id", $data['start_node_id']);
+        $this->db->where("end_node_id", $data['end_node_id']);
+        $this->db->delete("kunci_jawaban_edge_graf");
+    }
+
+    public function delSoal($id_soal)
+    {
+        $this->db->where("id", $id_soal);
+        $this->db->delete("soal");
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // TODO: delete checkbox not work
+
     public function saveKunciJawabanDrag($data)
     {
         $this->db->insert_batch("kunci_jawaban_graf_text", $data);

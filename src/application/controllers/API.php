@@ -62,15 +62,24 @@ class API extends CI_Controller
         $dataKunci = $this->input->post("dataKunci");
 
         $arrKunci = array();
+        $arrDel = array();
 
         if ($bentukSoal != "drag-and-drop") {
             foreach ($dataKunci as $el) {
-                array_push($arrKunci, array(
-                    "id_soal" => $el['id_soal'],
-                    "start_node_id" => $el['start_node'],
-                    "end_node_id" => $el['end_node'],
-                    "directional" => $el['directional']
-                ));
+                if ($el["checked"] == true) {
+                    array_push($arrKunci, array(
+                        "id_soal" => $el['id_soal'],
+                        "start_node_id" => $el['start_node'],
+                        "end_node_id" => $el['end_node'],
+                        "directional" => $el['directional']
+                    ));
+                } else {
+                    $this->LSoal->delKunciJawaban(array(
+                        "id_soal" => $el['id_soal'],
+                        "start_node_id" => $el['start_node'],
+                        "end_node_id" => $el['end_node'],
+                    ));
+                }
             }
 
             $this->LSoal->saveKunciJawaban($arrKunci);
@@ -87,7 +96,7 @@ class API extends CI_Controller
             $this->LSoal->saveKunciJawabanDrag($arrKunci);
         }
 
-        echo json_encode(["message" => "success", "data" => $arrKunci]);
+        echo json_encode(["message" => "success", "data" => $arrKunci, "del" => $arrDel]);
         return true;
     }
 
@@ -101,6 +110,15 @@ class API extends CI_Controller
         } else {
             $response = $this->LSoal->getKunciJawabanDrag($id_soal);
         }
+
+        echo json_encode($response);
+        return true;
+    }
+
+    public function delSoal($id_soal)
+    {
+        header("Content-Type: application/json");
+        $response = $this->LSoal->delSoal($id_soal);
 
         echo json_encode($response);
         return true;

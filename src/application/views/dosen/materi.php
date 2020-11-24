@@ -30,7 +30,7 @@
 					<td><?php echo $el['soal'] ?></td>
 					<td class="text-center">
 						<button class="btn btn-primary" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalKunciJawaban">Kunci Jawaban</button>
-						<button class="btn btn-info" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalEditSoal">Edit</button>
+						<!-- <button class="btn btn-info" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalEditSoal">Edit</button> -->
 						<button class="btn btn-danger" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalHapusSoal">Hapus</button>
 					</td>
 
@@ -297,18 +297,38 @@
 					col.appendChild(checkbox);
 					checkbox.id = "check." + node[i - 1].id + "." + node[j - 1].id
 					checkbox.onchange = function(event) {
-						if (event.target.checked == true) {
-							kunciJawabanForm.data.push({
-								id_soal: node[i - 1].id_soal,
-								checkbox_id: event.target.id,
-								start_node: node[i - 1].id,
-								end_node: node[j - 1].id,
-								directional: false
-							});
+						let index = kunciJawabanForm.data.findIndex(el => el.checkbox_id == event.target.id);
+						if (index < 0) {
+							if (event.target.checked == true) {
+								kunciJawabanForm.data.push({
+									id_soal: node[i - 1].id_soal,
+									checkbox_id: event.target.id,
+									start_node: node[i - 1].id,
+									end_node: node[j - 1].id,
+									directional: false,
+									checked: event.target.checked
+								});
+							}
 						} else {
-							kunciJawabanForm.data = kunciJawabanForm.data.filter((val) => {
-								return val.checkbox_id != event.target.id
-							});
+							if (event.target.checked == true) {
+								kunciJawabanForm.data[index] = {
+									id_soal: node[i - 1].id_soal,
+									checkbox_id: event.target.id,
+									start_node: node[i - 1].id,
+									end_node: node[j - 1].id,
+									directional: false,
+									checked: true
+								}
+							} else {
+								kunciJawabanForm.data[index] = {
+									id_soal: node[i - 1].id_soal,
+									checkbox_id: event.target.id,
+									start_node: node[i - 1].id,
+									end_node: node[j - 1].id,
+									directional: false,
+									checked: false
+								}
+							}
 						}
 					}
 				}
@@ -428,7 +448,6 @@
 			.then(res => res.json())
 			.then(data => {
 				if (data.length != 0) {
-
 					data.forEach(el => {
 						document
 							.getElementById('pilihNode' + el.id_text_graf).value = el.id_text_node;
@@ -447,6 +466,7 @@
 		fetch("<?php echo site_url('API/getSoalById/') ?>" + soalid)
 			.then(res => res.json())
 			.then(data => {
+				console.log(data);
 				document.getElementById("deskripsiSoalKunciJawaban").innerHTML = data.soal;
 				let formKunci = document.getElementById("formKunciJawaban") || document.createElement("form");
 				formKunci.id = "formKunciJawaban";
@@ -486,6 +506,8 @@
 			dataKunci: kunciJawabanForm.data
 		};
 
+		console.log(data);
+
 		$.ajax({
 				method: "POST",
 				url: "<?php echo site_url('API/saveKunciJawaban/') ?>",
@@ -499,5 +521,19 @@
 					$("#modalKunciJawaban").modal('toggle');
 				}
 			});
+	})
+
+	$("#modalHapusSoal").on("show.bs.modal", function(event) {
+		let soalid = $(event.relatedTarget).data('soalid');
+		$("#hapusSoalButton").on("click", function() {
+			$.ajax({
+					method: "GET",
+					url: "<?php echo site_url('API/delSoal/') ?>" + soalid,
+				})
+				.done(function(res) {
+					// $("#modalHapusSoal").modal('toggle');
+					window.location.reload(false);
+				});
+		})
 	})
 </script>
