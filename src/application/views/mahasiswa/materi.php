@@ -68,46 +68,100 @@
 							let elTugas = document.getElementById("tugas");
 							let divSoal = document.createElement("div");
 							let divSoalText = document.createElement("div");
+							let divSoalButton = document.createElement("div");
+							divSoalButton.setAttribute("class", "px-3 py-2");
 
 							soalText = document.createElement("span");
 							soalText.appendChild(document.createTextNode(el.soal));
 							divSoalText.appendChild(soalText);
 							divSoalText.setAttribute("class", "w-100");
 
-							divSoal.setAttribute("class", "col-12");
+							let buttonSaveJawaban = document.createElement("button");
+							buttonSaveJawaban.setAttribute("class", "btn btn-primary");
+							buttonSaveJawaban.appendChild(document.createTextNode("Simpan Jawaban"));
+							buttonSaveJawaban.id = "button-graf-interaktif";
+							buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id)
+							divSoalButton.appendChild(buttonSaveJawaban);
+
+							divSoal.setAttribute("class", "d-flex flex-wrap");
 							divSoal.appendChild(divSoalText);
 
 							let canvas = document.createElement("canvas");
 							canvas.id = "canvas" + el.id;
-							canvas.setAttribute("width", 800);
-							canvas.setAttribute("height", 600);
+							canvas.width = 800;
+							// canvas.setAttribute("height", 600);
+							var heightRatio = 0.5;
+							canvas.height = canvas.width * heightRatio;
 							canvas.setAttribute("style", "border: 2px solid black; background-color: white;");
 							divSoal.appendChild(canvas);
+							divSoal.appendChild(divSoalButton);
+
 							elTugas.appendChild(divSoal);
-							this.populateNode(canvas.id, el.node, el.bentuk_soal);
+							console.log(el);
+							this.populateNode(canvas.id, el.node, el.bentuk_soal, el.id);
 						}
 					})
 				});
 
+			let arrGraph = [];
+
+			function saveJawabanGraf(id_soal) {
+				let dataaa = createdNode.find(el => el.id_soal == id_soal);
+				console.log("data")
+				console.log(dataaa);
+
+				let kirim = [];
+				let graphObj = arrGraph.find(el => el.id_soal == id_soal);
+				if (graphObj.id_soal == id_soal) {
+					let edges = graphObj.graphObj.edges;
+					let isEuler = graphObj.graphObj.euler;
+					console.log(graphObj);
+					Object.entries(edges).forEach(([keey, ell]) => {
+						kirim.push({
+							id_soal: id_soal,
+							id_mhs: <?php echo $this->session->userdata('id'); ?>,
+							start_node_id: dataaa.data.find(elll => elll.nodeId == ell.startNodeid).id,
+							end_node_id: dataaa.data.find(elll => elll.nodeId == ell.endNodeid).id,
+							bobot: 0,
+							directional: isEuler
+						});
+					})
+				}
+				console.log(kirim)
+			}
+
 			// graf interactive
-			function populateNode(canvasId, data, bentukSoal) {
-				// Graph(canvasId, connecting, euler)
+			function populateNode(canvasId, data, bentukSoal, id_soal) {
 				let graph = null;
 				if (bentukSoal === "membuat-graf-euler") {
-					graph = new Graph(canvasId, true, true);
+					graph = new Graph(canvasId, true, true)
 				} else if (bentukSoal === "pilih-node" || bentukSoal === "membuat-matriks") {
 					graph = new Graph(canvasId, false, false);
 				} else {
 					graph = new Graph(canvasId, true, false);
 				}
+
+
+				let nodeData = [];
 				data.forEach(el => {
 					let nodeId = graph.node(Number(el.posx), Number(el.posy), 25, el.text).id;
-					createdNode.push({
+					nodeData.push({
+						id_soal: el.id_soal,
 						nodeId: nodeId,
 						text: el.text,
 						id: el.id
 					});
 				});
+
+				createdNode.push({
+					id_soal: id_soal,
+					data: nodeData
+				});
+
+				arrGraph.push({
+					id_soal: id_soal,
+					graphObj: graph
+				})
 			}
 
 			// drag-and-drop interactive

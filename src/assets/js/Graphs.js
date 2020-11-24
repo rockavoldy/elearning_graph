@@ -378,7 +378,7 @@ class Graph {
             }
             if (e.which == 1) {
                 if (this.active == null) {
-                    (this.buildable.node === true ? this.building = true : false);
+                    this.building = (this.buildable?.node === true ? true : false);
                     this.building_start = [this.mousex, this.mousey];
 
                 }
@@ -779,11 +779,11 @@ class Graph {
                 return "";
             }
 
-            if (this.active != null) {
-                console.log(`Node "${this.active.text}" with size: ${this.active.r}; on x: ${this.active.x}, y: ${this.active.y}`)
+            // if (this.active != null) {
+            //     console.log(`Node "${this.active.text}" with size: ${this.active.r}; on x: ${this.active.x}, y: ${this.active.y}`)
 
-                console.log(this.active)
-            }
+            //     console.log(this.active)
+            // }
 
             dragging = false;
 
