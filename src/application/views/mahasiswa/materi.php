@@ -136,6 +136,12 @@
 				console.log(arrDrag);
 			}
 
+			let arrMatriks = [];
+
+			function saveJawabanMatriks(id_soal) {
+				console.log(arrMatriks)
+			}
+
 			// graf interactive
 			function populateNode(canvasId, data, bentukSoal, id_soal) {
 				let graph = null;
@@ -203,7 +209,6 @@
 				})
 
 				this.makeDraggable(data);
-
 				return elDrag;
 			}
 
@@ -213,6 +218,7 @@
 				table.id = "matrixTable";
 				table.setAttribute("class", "table table-bordered");
 				table.innerHTML = "";
+				console.log(data);
 				for (let i = 0; i < data.length + 1; i++) {
 					let row = document.createElement("tr");
 
@@ -229,7 +235,42 @@
 							let checkbox = document.createElement("input");
 							checkbox.setAttribute("type", "checkbox");
 							col.appendChild(checkbox);
-							checkbox.id = "check" + data[i - 1].id + data[j - 1].id
+							checkbox.id = "check." + data[i - 1].id + "." + data[j - 1].id;
+							checkbox.onchange = function(event) {
+								let getIndexMatriks = arrMatriks.findIndex(el => el.checkbox_id == event.target.id);
+								if (getIndexMatriks < 0) {
+									if (event.target.checked == true) {
+										arrMatriks.push({
+											id_soal: data[i - 1].id_soal,
+											checkbox_id: event.target.id,
+											start_node: data[i - 1].id,
+											end_node: data[j - 1].id,
+											directional: false,
+											checked: event.target.checked
+										});
+									}
+								} else {
+									if (event.target.checked == true) {
+										arrMatriks[getIndexMatriks] = {
+											id_soal: data[i - 1].id_soal,
+											checkbox_id: event.target.id,
+											start_node: data[i - 1].id,
+											end_node: data[j - 1].id,
+											directional: false,
+											checked: true
+										}
+									} else {
+										arrMatriks[getIndexMatriks] = {
+											id_soal: data[i - 1].id_soal,
+											checkbox_id: event.target.id,
+											start_node: data[i - 1].id,
+											end_node: data[j - 1].id,
+											directional: false,
+											checked: false
+										}
+									}
+								}
+							}
 						}
 
 						row.appendChild(col);
