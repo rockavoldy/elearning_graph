@@ -22,11 +22,6 @@
 				}
 			</style>
 			<div id="tugas"></div>
-			<div class="d-none mb-3 p-2" id="drag-and-drop" class="col-12" style="border: 2px solid black; background-color: white;">
-				<div id="graf-dropzone" class="d-flex flex-wrap"></div>
-
-				<div id="graf-pilihan" class="d-flex flex-wrap"></div>
-			</div>
 		</div>
 		<script>
 			// let graph = new Graph('canvas');
@@ -37,54 +32,52 @@
 				.then(data => {
 					console.log(data);
 					data.forEach(el => {
+						let elTugas = document.getElementById("tugas");
+						let divSoal = document.createElement("div");
+						let divSoalText = document.createElement("div");
+						let divSoalButton = document.createElement("div");
+						divSoalButton.setAttribute("class", "px-3 py-2");
+
+						soalText = document.createElement("span");
+						soalText.appendChild(document.createTextNode(el.soal || "Tidak ada deskripsi soal"));
+						divSoalText.appendChild(soalText);
+						divSoalText.setAttribute("class", "w-100");
+
+						let buttonSaveJawaban = document.createElement("button");
+						buttonSaveJawaban.setAttribute("class", "btn btn-primary");
+						buttonSaveJawaban.appendChild(document.createTextNode("Simpan Jawaban"));
+
 						if (el.bentuk_soal == "drag-and-drop") {
-							let dragdrop = document.getElementById("drag-and-drop");
-							let divSoal = document.createElement("div");
-							let divSoalText = document.createElement("div");
+							buttonSaveJawaban.onclick = () => this.saveJawabanDrag(el.id);
 
-							soalText = document.createElement("span");
-							soalText.appendChild(document.createTextNode(el.soal));
-							divSoalText.appendChild(soalText);
-							divSoalText.setAttribute("class", "w-100");
-
-							divSoal.setAttribute("class", "col-12");
+							divSoal.setAttribute("class", "d-flex flex-wrap col-12 mb-3");
 							divSoal.appendChild(divSoalText);
 
-							dragdrop.insertBefore(divSoal, document.getElementById("graf-dropzone"));
-							dragdrop.classList.remove('d-none');
+							elDrop = this.populateGraf(el.graf);
+							elDrag = this.populateDrop(el.node.concat(el.edge))
+							divSoal.appendChild(elDrop);
+							divSoal.appendChild(elDrag);
+							divSoalButton.appendChild(buttonSaveJawaban);
 
-							this.populateGraf(el.graf);
-							this.populateNodeDrop(el.node);
-							this.populateEdge(el.edge);
+							divSoal.appendChild(divSoalButton);
+							elTugas.appendChild(divSoal);
 						} else if (el.bentuk_soal == "membuat-matriks") {
+							buttonSaveJawaban.onclick = () => this.saveJawabanMatriks(el.id)
 							const table = this.populateMatrix(el.node);
-
-							let divTugas = document.getElementById("tugas");
 							let divTableResponsive = document.createElement("div");
 							divTableResponsive.setAttribute("class", "table-responsive");
 							divTableResponsive.appendChild(table);
-							divTugas.appendChild(divTableResponsive);
-						} else {
-							let elTugas = document.getElementById("tugas");
-							let divSoal = document.createElement("div");
-							let divSoalText = document.createElement("div");
-							let divSoalButton = document.createElement("div");
-							divSoalButton.setAttribute("class", "px-3 py-2");
+							divSoal.appendChild(divSoalText);
+							divSoal.appendChild(divTableResponsive);
 
-							soalText = document.createElement("span");
-							soalText.appendChild(document.createTextNode(el.soal));
-							divSoalText.appendChild(soalText);
-							divSoalText.setAttribute("class", "w-100");
-
-							let buttonSaveJawaban = document.createElement("button");
-							buttonSaveJawaban.setAttribute("class", "btn btn-primary");
-							buttonSaveJawaban.appendChild(document.createTextNode("Simpan Jawaban"));
-							buttonSaveJawaban.id = "button-graf-interaktif";
-							buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id)
 							divSoalButton.appendChild(buttonSaveJawaban);
 
-							divSoal.setAttribute("class", "d-flex flex-wrap");
-							divSoal.appendChild(divSoalText);
+							divSoal.appendChild(divSoalButton);
+							elTugas.appendChild(divSoal);
+						} else {
+							// buttonSaveJawaban.id = "button-graf-interaktif";
+							buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id)
+
 
 							let canvas = document.createElement("canvas");
 							canvas.id = "canvas" + el.id;
@@ -93,29 +86,35 @@
 							var heightRatio = 0.5;
 							canvas.height = canvas.width * heightRatio;
 							canvas.setAttribute("style", "border: 2px solid black; background-color: white;");
-							divSoal.appendChild(canvas);
-							divSoal.appendChild(divSoalButton);
 
+							divSoal.setAttribute("class", "d-flex flex-wrap mb-3");
+							divSoal.appendChild(divSoalText);
+							divSoal.appendChild(canvas);
 							elTugas.appendChild(divSoal);
-							console.log(el);
+
 							this.populateNode(canvas.id, el.node, el.bentuk_soal, el.id);
+
+							divSoalButton.appendChild(buttonSaveJawaban);
+							divSoal.appendChild(divSoalButton);
 						}
+
+
+						// console.log(el);
 					})
 				});
 
 			let arrGraph = [];
 
+			// function to save jawaban
 			function saveJawabanGraf(id_soal) {
 				let dataaa = createdNode.find(el => el.id_soal == id_soal);
-				console.log("data")
-				console.log(dataaa);
 
 				let kirim = [];
 				let graphObj = arrGraph.find(el => el.id_soal == id_soal);
 				if (graphObj.id_soal == id_soal) {
 					let edges = graphObj.graphObj.edges;
 					let isEuler = graphObj.graphObj.euler;
-					console.log(graphObj);
+					// console.log(graphObj);
 					Object.entries(edges).forEach(([keey, ell]) => {
 						kirim.push({
 							id_soal: id_soal,
@@ -127,7 +126,14 @@
 						});
 					})
 				}
-				console.log(kirim)
+				// console.log(kirim)
+			}
+
+			let arrDrag = [];
+			let arrDrop = [];
+
+			function saveJawabanDrag(id_soal) {
+				console.log(arrDrag);
 			}
 
 			// graf interactive
@@ -166,45 +172,39 @@
 
 			// drag-and-drop interactive
 			function populateGraf(data) {
-				let dropzone = document.getElementById("graf-dropzone");
+				const elDrop = document.createElement("div");
+				elDrop.setAttribute("class", "col-12 d-flex flex-wrap mb-2");
+				elDrop.id = "graf-dropzone";
+
 				data.forEach(el => {
 					let graf = document.createElement("div");
-					graf.id = "grafbox" + el.id;
+					graf.id = "graf-" + el.id;
 					graf.setAttribute("class", "col-3 p-2 border border-dark bg-light rounded-lg");
 					graf.setAttribute("style", "height: 200px");
 					graf.appendChild(document.createTextNode(el.text));
-					dropzone.appendChild(graf);
+					elDrop.appendChild(graf);
 				})
 
 				this.makeDropzone(data);
+				return elDrop;
 			}
 
-			function populateNodeDrop(data) {
-				let pilihan = document.getElementById("graf-pilihan");
+			function populateDrop(data) {
+				const elDrag = document.createElement("div");
+				elDrag.setAttribute("class", "col-12 d-flex flex-wrap border border-dark");
+				elDrag.id = "graf-pilihan";
 
 				data.forEach(el => {
 					let nodee = document.createElement("div");
-					nodee.id = "drop" + el.id;
-					nodee.setAttribute("class", "col-2 p-1 border border-dark bg-dark text-light rounded");
+					nodee.id = "drop-" + el.id;
+					nodee.setAttribute("class", "col-2 mx-2 my-1 border border-dark bg-dark text-light rounded");
 					nodee.appendChild(document.createTextNode(el.text));
-					pilihan.appendChild(nodee);
+					elDrag.appendChild(nodee);
 				})
 
 				this.makeDraggable(data);
-			}
 
-			function populateEdge(data) {
-				let pilihan = document.getElementById("graf-pilihan");
-
-				data.forEach(el => {
-					let edge = document.createElement("div");
-					edge.id = "drop" + el.id;
-					edge.setAttribute("class", "col-2 p-1 border border-dark bg-dark text-light rounded");
-					edge.appendChild(document.createTextNode(el.text));
-					pilihan.appendChild(edge);
-				})
-
-				this.makeDraggable(data);
+				return elDrag;
 			}
 
 			// membuat matriks table
@@ -240,52 +240,65 @@
 				return table;
 			}
 
+
 			function makeDropzone(data) {
 				data.forEach(el => {
-					interact("#grafbox" + el.id).dropzone({
+					interact("#graf-" + el.id)
+						.dropzone({
+							ondrop: function(event) {
+								console.log(event.target.id); //dropbox (graf)
+								console.log(event.relatedTarget.id); //draggable item (node or edge)
+
+								arrDrag = arrDrag.filter(el => el.id_jawaban != event.relatedTarget.id.split("-")[1]);
+								arrDrag.push({
+									id_soal: el.id,
+									id_text_graf: event.target.id.split("-")[1],
+									id_jawaban: event.relatedTarget.id.split("-")[1],
+								})
+								console.log(arrDrag)
+							}
+
+						})
+						.on('dropactivate', function(event) {
+							event.target.classList.add('drop-activated');
+						})
+					interact("#graf-pilihan").dropzone({
 						ondrop: function(event) {
-							alert("dropped: " + event.target.id);
+							console.log("delete this shit")
+							console.log(arrDrag)
 						}
-					}).on('dropactivate', function(event) {
-						event.target.classList.add('drop-activated');
 					})
 				})
 			}
 
 			function makeDraggable(data) {
-				let drop = [
-
-				]
 				let position = {
 					x: 0,
 					y: 0
 				};
 				data.forEach(el => {
-					drop["drop" + el.id] = {
+					arrDrop["drop-" + el.id] = {
 						position: {
 							x: 0,
 							y: 0
-						}
+						},
+						droppedInto: null
 					}
-					interact('#drop' + el.id).draggable({
+					interact("#drop-" + el.id).draggable({
 						listeners: {
 							start(event) {
 								console.log(event.type, event.target)
 							},
 							move(event) {
-								drop["drop" + el.id].position.x += event.dx
-								drop["drop" + el.id].position.y += event.dy
+								arrDrop["drop-" + el.id].position.x += event.dx
+								arrDrop["drop-" + el.id].position.y += event.dy
 
 								event.target.style.transform =
-									`translate(${drop["drop" + el.id].position.x}px, ${drop["drop" + el.id].position.y}px)`
+									`translate(${arrDrop["drop-" + el.id].position.x}px, ${arrDrop["drop-" + el.id].position.y}px)`
 							},
 						}
 					})
 				})
-			}
-
-			function saveJawaban(data) {
-				// TODO
 			}
 		</script>
 	</div>
