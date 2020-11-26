@@ -146,7 +146,7 @@ class LSoal extends CI_Model
 
     public function saveKunciJawaban($data)
     {
-        $this->db->insert_batch("kunci_jawaban_edge_graf", $data);
+        $this->db->insert("kunci_jawaban_edge_graf", $data);
     }
 
     public function delKunciJawaban($data)
@@ -170,6 +170,39 @@ class LSoal extends CI_Model
 
     // TODO: delete checkbox not work
 
+    public function getGrafTextById($id)
+    {
+        $this->db->where('id', $id);
+        return $this->db->get("soal_graf_text")->row_array();
+    }
+
+    public function getJawabanDrag($id_soal, $id_mhs)
+    {
+        $this->db->where("id_soal", $id_soal);
+        $this->db->where("id_mhs", $id_mhs);
+        $this->db->order_by("id_text_graf");
+        return $this->db->get("jawaban_graf_text")->result_array();
+    }
+
+    public function saveJawabanGrafText($data)
+    {
+        $this->db->where("id_soal", $data['id_soal']);
+        $this->db->where("id_mhs", $data['id_mhs']);
+        $this->db->where("id_text_graf", $data['id_text_graf']);
+        $getData = $this->db->get("jawaban_graf_text");
+        if ($getData->num_rows() > 0) {
+            $this->db->where("id", $getData->row_array()["id"]);
+            $this->db->update("jawaban_graf_text", $data);
+        } else {
+            $this->db->insert("jawaban_graf_text", $data);
+        }
+    }
+
+    public function saveNilaiMhs($data)
+    {
+        $this->db->insert("nilai_mhs", $data);
+    }
+
     public function saveKunciJawabanDrag($data)
     {
         $this->db->insert_batch("kunci_jawaban_graf_text", $data);
@@ -184,6 +217,7 @@ class LSoal extends CI_Model
     public function getKunciJawabanDrag($id_soal)
     {
         $this->db->where("id_soal", $id_soal);
+        $this->db->order_by("id_text_graf");
         return $this->db->get("kunci_jawaban_graf_text")->result_array();
     }
 

@@ -67,7 +67,7 @@ class API extends CI_Controller
         if ($bentukSoal != "drag-and-drop") {
             foreach ($dataKunci as $el) {
                 if ($el["checked"] == true) {
-                    array_push($arrKunci, array(
+                    $this->LSoal->saveKunciJawaban(array(
                         "id_soal" => $el['id_soal'],
                         "start_node_id" => $el['start_node'],
                         "end_node_id" => $el['end_node'],
@@ -81,8 +81,6 @@ class API extends CI_Controller
                     ));
                 }
             }
-
-            $this->LSoal->saveKunciJawaban($arrKunci);
         } else {
             foreach ($dataKunci as $el) {
                 array_push($arrKunci, array(
@@ -133,11 +131,13 @@ class API extends CI_Controller
 
         $response = "";
 
+        $nilai = $this->checkJawabanDrag($id_soal, $dataJawaban, $id_mhs);
+
         if ($bentukSoal == "drag-and-drop") {
             $response = array(
                 "message" => "success",
-                "nilai" => 0,
-                "data" => $dataJawaban
+                "nilai" => $nilai['nilai'],
+                "data" => $dataJawaban,
             );
         } else if ($bentukSoal == "membuat-graf") {
             $response = array(
@@ -172,22 +172,61 @@ class API extends CI_Controller
     {
         $kunciJawaban = $this->LSoal->getKunciJawabanDrag($idSoal);
         $ret_array = array();
+        usort($dataJawaban, function ($a, $b) {
+            return $a['id_text_graf'] - $b['id_text_graf'];
+        });
 
         foreach ($dataJawaban as $jawaban) {
-            $idxKunci = 0;
-            for ($i = 0; $i < sizeof($kunciJawaban); $i++) {
-                if ($jawaban['id_text_graf'] == $kunciJawaban[$i]["id_text_graf"]) {
-                    $idxKunci = $i;
-                    break;
-                }
-            }
-
-            if ($jawaban['id_jawaban'] == $kunciJawaban[$idxKunci]["id_text_node"]) {
-                array_push($ret_array, array(
-                    ""
+            $checkBentuk = $this->LSoal->getGrafTextById($jawaban['id_jawaban'])["bentuk"];
+            if ($checkBentuk == "node") {
+                $this->LSoal->saveJawabanGrafText(array(
+                    "id_soal" => $idSoal,
+                    "id_mhs" => $idMhs,
+                    "id_text_graf" => $jawaban['id_text_graf'],
+                    "id_text_node" => $jawaban['id_jawaban'],
+                    "directional" => null
+                ));
+            } else {
+                $this->LSoal->saveJawabanGrafText(array(
+                    "id_soal" => $idSoal,
+                    "id_mhs" => $idMhs,
+                    "id_text_graf" => $jawaban['id_text_graf'],
+                    "id_text_edge" => $jawaban['id_jawaban'],
+                    "directional" => null
                 ));
             }
         }
+
+        $dataJawaban = $this->LSoal->getJawabanDrag($idSoal, $idMhs);
+
+        $nilai = array(
+            "id_soal" => $idSoal,
+            "id_mhs" => $idMhs,
+            "nilai" => 0
+        );
+
+        $pembagiSoal = count($kunciJawaban) + 1;
+        $nilaiPerSoal = 100 / $pembagiSoal;
+
+        foreach ($kunciJawaban as $kunci) {
+            foreach ($dataJawaban as $jawaban) {
+                $nilaiTemp = 0;
+                if ($kunci['id_text_graf'] == $jawaban['id_text_graf']) {
+                    if ($kunci['id_text_node'] == $jawaban['id_text_node']) {
+                        $nilaiTemp += 50;
+                    }
+                    if ($kunci['id_text_edge'] == $jawaban['id_text_edge']) {
+                        $nilaiTemp += 50;
+                    }
+                    $nilai['nilai'] = $nilai['nilai'] + ($nilaiTemp * $nilaiPerSoal / 100);
+                    break;
+                }
+            }
+            // $nilai['nilai'] += $nilaiTemp;
+        }
+
+        $this->LSoal->saveNilaiMhs($nilai);
+        return $nilai;
     }
 
     private function getNode($node)

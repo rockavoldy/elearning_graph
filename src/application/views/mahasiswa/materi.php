@@ -298,6 +298,7 @@
 
 
 			function makeDropzone(data) {
+				console.log(data);
 				data.forEach(el => {
 					interact("#graf-" + el.id)
 						.dropzone({
@@ -307,7 +308,7 @@
 
 								arrDrag = arrDrag.filter(el => el.id_jawaban != event.relatedTarget.id.split("-")[1]);
 								arrDrag.push({
-									id_soal: el.id,
+									id_soal: el.id_soal,
 									id_text_graf: event.target.id.split("-")[1],
 									id_jawaban: event.relatedTarget.id.split("-")[1],
 								})
