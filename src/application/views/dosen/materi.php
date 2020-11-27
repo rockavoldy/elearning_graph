@@ -29,8 +29,10 @@
 					<th><?php echo $i ?></th>
 					<td><?php echo $el['soal'] ?></td>
 					<td class="text-center">
-						<button class="btn btn-primary" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalKunciJawaban">Kunci Jawaban</button>
-						<!-- <button class="btn btn-info" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalEditSoal">Edit</button> -->
+						<?php if ($el['bentuk_soal'] != "isian-esai") { ?>
+							<button class="btn btn-primary" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalKunciJawaban">Kunci Jawaban</button>
+						<?php } ?>
+						<button class="btn btn-info" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalEditSoal">Edit</button>
 						<button class="btn btn-danger" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalHapusSoal">Hapus</button>
 					</td>
 
@@ -119,8 +121,8 @@
 								<option value="membuat-graf-euler">Membuat Graf Euler</option>
 								<option value="drag-and-drop">Drag & Drop</option>
 								<option value="membuat-matriks">Membuat Matriks</option>
-								<option value="pilih-node">Memilih Node</option>
-								<option value="isian-array">Membuat Array</option>
+								<option value="pilih-node">Memilih Node/Edge</option>
+								<option value="isian-esai">Esai</option>
 							</select>
 						</div>
 						<div class="form-group">
@@ -180,27 +182,7 @@
 	$("#bentukSoal").on("change", (event) => {
 		let divSoalCustom = document.getElementById("divSoalCustom");
 		divSoalCustom.innerHTML = "";
-		if (event.target.value != "drag-and-drop") {
-			let heading5 = document.createElement("h5");
-			heading5.appendChild(document.createTextNode(event.target.selectedOptions[0].text));
-
-			let divFormGroupArray = document.createElement("div");
-			divFormGroupArray.setAttribute("class", "form-group");
-
-			let labelFormArray = document.createElement("label");
-			labelFormArray.setAttribute("for", "listNode." + event.target.value);
-			labelFormArray.appendChild(document.createTextNode("Array Node"));
-			let inputFormArray = document.createElement("input");
-			inputFormArray.setAttribute("type", "text");
-			inputFormArray.setAttribute("class", "form-control");
-			inputFormArray.setAttribute("placeholder", "{A, B, C}")
-			inputFormArray.id = "listNode." + event.target.value;
-
-			divSoalCustom.appendChild(heading5);
-			divFormGroupArray.appendChild(labelFormArray);
-			divFormGroupArray.appendChild(inputFormArray);
-			divSoalCustom.appendChild(divFormGroupArray);
-		} else {
+		if (event.target.value == "drag-and-drop") {
 			let heading5 = document.createElement("h5");
 			heading5.appendChild(document.createTextNode(event.target.selectedOptions[0].text));
 			divSoalCustom.appendChild(heading5);
@@ -225,39 +207,86 @@
 				divFormGroupArray.setAttribute("class", "form-group");
 
 				let labelFormArray = document.createElement("label");
-				labelFormArray.setAttribute("for", "list" + textInput + "." + event.target.value);
+				labelFormArray.setAttribute("for", "list" + textInput + "-" + event.target.value);
 				labelFormArray.appendChild(document.createTextNode("Array " + textInput));
 				let inputFormArray = document.createElement("input");
 				inputFormArray.setAttribute("type", "text");
 				inputFormArray.setAttribute("class", "form-control");
 				inputFormArray.setAttribute("placeholder", "{A, B, C}")
-				inputFormArray.id = "list" + textInput + "." + event.target.value
+				inputFormArray.id = "list" + textInput + "-" + event.target.value
 
 				divFormGroupArray.appendChild(labelFormArray);
 				divFormGroupArray.appendChild(inputFormArray);
 				divSoalCustom.appendChild(divFormGroupArray);
 			}
+
+		} else if (event.target.value == 'isian-esai') {
+
+		} else {
+			let heading5 = document.createElement("h5");
+			heading5.appendChild(document.createTextNode(event.target.selectedOptions[0].text));
+
+			let divFormGroupArray = document.createElement("div");
+			divFormGroupArray.setAttribute("class", "form-group");
+
+			let labelFormArray = document.createElement("label");
+			labelFormArray.setAttribute("for", "listNode-" + event.target.value);
+			labelFormArray.appendChild(document.createTextNode("Array Node"));
+			let inputFormArray = document.createElement("input");
+			inputFormArray.setAttribute("type", "text");
+			inputFormArray.setAttribute("class", "form-control");
+			inputFormArray.setAttribute("placeholder", "{A, B, C}")
+			inputFormArray.id = "listNode-" + event.target.value;
+			divSoalCustom.appendChild(heading5);
+			divFormGroupArray.appendChild(labelFormArray);
+			divFormGroupArray.appendChild(inputFormArray);
+			divSoalCustom.appendChild(divFormGroupArray);
+			if (event.target.value == 'pilih-node') {
+				let divFormGroupArrayEdge = document.createElement("div");
+				divFormGroupArrayEdge.setAttribute("class", "form-group");
+
+				let labelFormArrayEdge = document.createElement("label");
+				labelFormArrayEdge.setAttribute("for", "listEdge-" + event.target.value);
+				labelFormArrayEdge.appendChild(document.createTextNode("Array Edge"));
+
+				let inputFormArrayEdge = document.createElement("input");
+				inputFormArrayEdge.setAttribute("type", "text");
+				inputFormArrayEdge.setAttribute("class", "form-control");
+				inputFormArrayEdge.setAttribute("placeholder", "{(A, B), (A, C)}")
+				inputFormArrayEdge.id = "listEdge-" + event.target.value;
+
+				divFormGroupArrayEdge.appendChild(labelFormArrayEdge);
+				divFormGroupArrayEdge.appendChild(inputFormArrayEdge);
+				divSoalCustom.appendChild(divFormGroupArrayEdge);
+			}
 		}
 	})
 
 	$("#saveSoalButton").on("click", () => {
-		let bentukSoal = $("#bentukSoal").val();
+		let bentukSoal = document.getElementById("bentukSoal").value;
 		let data = {};
-		if (bentukSoal != "drag-and-drop") {
+		if (bentukSoal == "drag-and-drop") {
 			data = {
 				deskripsiSoal: $("#deskripsiSoal").val(),
-				listNode: $("#listNode." + bentukSoal).val(),
+				dataSoalGraf: $("#listGraf-" + bentukSoal).val(),
+				dataSoalNode: $("#listNode-" + bentukSoal).val(),
+				dataSoalEdge: $("#listEdge-" + bentukSoal).val()
+			}
+		} else if (bentukSoal == "pilih-node") {
+			data = {
+				deskripsiSoal: $("#deskripsiSoal").val(),
+				listNode: $("#listNode-" + bentukSoal).val(),
+				listEdge: $("#listEdge-" + bentukSoal).val(),
 			}
 		} else {
 			data = {
 				deskripsiSoal: $("#deskripsiSoal").val(),
-				dataSoalGraf: $("#listGraf." + bentukSoal).val(),
-				dataSoalNode: $("#listNode." + bentukSoal).val(),
-				dataSoalEdge: $("#listEdge." + bentukSoal).val()
+				listNode: $("#listNode-" + bentukSoal).val(),
 			}
 		}
 
 		// TODO: implement isian
+		console.log(data);
 
 		$.ajax({
 				method: "POST",
@@ -299,16 +328,14 @@
 					checkbox.onchange = function(event) {
 						let index = kunciJawabanForm.data.findIndex(el => el.checkbox_id == event.target.id);
 						if (index < 0) {
-							if (event.target.checked == true) {
-								kunciJawabanForm.data.push({
-									id_soal: node[i - 1].id_soal,
-									checkbox_id: event.target.id,
-									start_node: node[i - 1].id,
-									end_node: node[j - 1].id,
-									directional: false,
-									checked: event.target.checked
-								});
-							}
+							kunciJawabanForm.data.push({
+								id_soal: node[i - 1].id_soal,
+								checkbox_id: event.target.id,
+								start_node: node[i - 1].id,
+								end_node: node[j - 1].id,
+								directional: bentukSoal == "membuat-graf-euler" ? true : false,
+								checked: event.target.checked
+							});
 						} else {
 							if (event.target.checked == true) {
 								kunciJawabanForm.data[index] = {
@@ -316,7 +343,7 @@
 									checkbox_id: event.target.id,
 									start_node: node[i - 1].id,
 									end_node: node[j - 1].id,
-									directional: false,
+									directional: bentukSoal == "membuat-graf-euler" ? true : false,
 									checked: true
 								}
 							} else {
@@ -325,7 +352,7 @@
 									checkbox_id: event.target.id,
 									start_node: node[i - 1].id,
 									end_node: node[j - 1].id,
-									directional: false,
+									directional: bentukSoal == "membuat-graf-euler" ? true : false,
 									checked: false
 								}
 							}
@@ -461,6 +488,96 @@
 		return table;
 	}
 
+	function populatePilihKunci(node, edge) {
+		let dataPopulate = node;
+
+		const createOption = (value, text, selected, disabled) => {
+			let selectOption = document.createElement("option");
+			selectOption.setAttribute("value", value);
+			selected ? selectOption.setAttribute("selected", true) : false;
+			disabled ? selectOption.setAttribute("disabled", true) : false;
+			selectOption.appendChild(document.createTextNode(text));
+
+			return selectOption;
+		}
+
+		let divKunci = document.createElement("div");
+
+		let divSwitch = document.createElement("div");
+		divSwitch.setAttribute("class", "custom-control, custom-switch");
+
+		let inputSwitch = document.createElement("input");
+		inputSwitch.setAttribute("class", "custom-control-input");
+		inputSwitch.setAttribute("type", "checkbox");
+		inputSwitch.id = "switch-pilih";
+		inputSwitch.checked = false;
+
+		let labelSwitch = document.createElement("label");
+		labelSwitch.setAttribute("class", "custom-control-label");
+		labelSwitch.setAttribute("for", "switch-pilih");
+		labelSwitch.appendChild(document.createTextNode("Pilih Node"))
+
+		let selectInput = document.createElement("select");
+		selectInput.setAttribute("class", "form-control");
+		selectInput.id = "pilih-node";
+		selectInput.onchange = function(event) {
+			console.log("pilih " + event.target.value);
+			let index = kunciJawabanForm.data.findIndex(el => el.id == event.target.value);
+			if (index >= 0) {
+				kunciJawabanForm.data[index].id = event.target.value;
+			} else if (index < 0) {
+				kunciJawabanForm.data = {
+					"id_soal": node[0].id_soal,
+					"id": event.target.value,
+					"kunci": true
+				};
+			}
+		}
+
+		let selectOptionDefault = createOption("", "Pilih Node/Edge", true, true);
+		selectInput.appendChild(selectOptionDefault)
+
+		dataPopulate.forEach(el => {
+			let selectOption = "";
+			if (el.posy) {
+				selectOption = createOption("node." +
+					el.id, el.text);
+			} else {
+				selectOption = createOption("edge." + el.id, el.start_text + " - " + el.end_text);
+			}
+			selectInput.appendChild(selectOption);
+		});
+
+		inputSwitch.onchange = function(event) {
+			selectInput.innerHTML = "";
+			let selectOptionDefault = createOption("", "Pilih Node/Edge", true, true);
+			selectInput.appendChild(selectOptionDefault)
+			if (event.target.checked) {
+				labelSwitch.removeChild(labelSwitch.childNodes[0]);
+				labelSwitch.appendChild(document.createTextNode("Pilih Edge"));
+				edge.forEach(el => {
+					let selectOption = createOption("edge." + el.id, el.start_text + " - " + el.end_text);
+					selectInput.appendChild(selectOption);
+				})
+			} else {
+				labelSwitch.removeChild(labelSwitch.childNodes[0]);
+				labelSwitch.appendChild(document.createTextNode("Pilih Node"));
+				node.forEach(el => {
+					let selectOption = createOption("node." + el.id, el.text);
+					selectInput.appendChild(selectOption);
+				})
+			}
+		}
+		divSwitch.appendChild(inputSwitch);
+
+		divSwitch.appendChild(labelSwitch);
+
+		divKunci.appendChild(divSwitch);
+		divKunci.appendChild(selectInput);
+
+		return divKunci;
+	}
+
 	$("#modalKunciJawaban").on("show.bs.modal", function(event) {
 		let soalid = $(event.relatedTarget).data('soalid');
 		fetch("<?php echo site_url('API/getSoalById/') ?>" + soalid)
@@ -472,12 +589,19 @@
 				formKunci.id = "formKunciJawaban";
 				document.getElementById("modalBody").appendChild(formKunci)
 				if (data.bentuk_soal == "drag-and-drop") {
+					console.log("drag-and-drop");
 					let table = populateDrag({
 						graf: data.graf,
 						node: data.node,
 						edge: data.edge
 					}, data.bentuk_soal);
 					formKunci.appendChild(table);
+				} else if (data.bentuk_soal == "pilih-node") {
+					console.log("pilih-node");
+					let kunci = populatePilihKunci(data.node, data.edge);
+					formKunci.appendChild(kunci);
+				} else if (data.bentuk_soal == "isian-esai") {
+					console.log("isian-esai");
 				} else {
 					let table = populateMatrix(data.node, data.bentuk_soal);
 					formKunci.appendChild(table);

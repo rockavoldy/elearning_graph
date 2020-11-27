@@ -12,6 +12,27 @@
 			<!-- /.container-fluid -->
 		</div>
 	</div>
+
+	<div class="modal fade" id="modalSaveJawaban" tabindex="-1">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Simpan jawaban</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<h6>Setelah jawaban disubmit, jawaban tidak akan bisa diubah kembali.</h5>
+						<div class="w-100 text-right">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
+							<button type="button" class="btn btn-primary" id="saveSoalButtonModal">Simpan</button>
+						</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="col-12 ">
 		<div class="card shadow px-3 py-4">
 			<h4>Tugas</h4>
@@ -74,11 +95,20 @@
 
 							divSoal.appendChild(divSoalButton);
 							elTugas.appendChild(divSoal);
+						} else if (el.bentuk_soal == "isian-esai") {
+							buttonSaveJawaban.onclick = () => this.saveJawabanIsian(el.id)
+							let divTextarea = document.createElement("textarea");
+							divTextarea.setAttribute("class", "form-control");
+							divTextarea.id = "isian-esai-" + el.id;
+							divTextarea.setAttribute("placeholder", "Isi jawaban disini");
+							divSoal.appendChild(divSoalText);
+							divSoal.appendChild(divTextarea);
+
+							divSoalButton.appendChild(buttonSaveJawaban);
+							divSoal.appendChild(divSoalButton);
+							elTugas.appendChild(divSoal);
 						} else {
 							// buttonSaveJawaban.id = "button-graf-interaktif";
-							buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id, el.bentuk_soal)
-
-
 							let canvas = document.createElement("canvas");
 							canvas.id = "canvas" + el.id;
 							canvas.width = 800;
@@ -92,7 +122,49 @@
 							divSoal.appendChild(canvas);
 							elTugas.appendChild(divSoal);
 
-							this.populateNode(canvas.id, el.node, el.bentuk_soal, el.id);
+							this.populateNode(canvas.id, el.node, el.bentuk_soal, el.id, el.edge);
+
+							let selectInput = document.createElement("select");
+							selectInput.setAttribute("class", "form-control");
+							selectInput.id = "pilih-jawaban";
+							selectInput.onchange = function(event) {
+								pilihNode = {
+									id_soal: el.id_soal,
+									jawaban: event.target.id
+								}
+							}
+							if (el.bentuk_soal == 'pilih-node') {
+								const createOption = (value, text, selected, disabled) => {
+									let selectOption = document.createElement("option");
+									selectOption.setAttribute("value", value);
+									selected ? selectOption.setAttribute("selected", true) : false;
+									disabled ? selectOption.setAttribute("disabled", true) : false;
+									selectOption.appendChild(document.createTextNode(text));
+
+									return selectOption;
+								}
+								for (let i = 0; i < el.node.length + 1; i++) {
+									if (i == 0) {
+										selectInput.appendChild(createOption("", "Pilihan Node", true, true));
+									} else {
+										selectInput.appendChild(createOption("node-" + el.node[i - 1].id, el.node[i - 1].text, false, false));
+									}
+								}
+
+								for (let i = 0; i < el.edge.length + 1; i++) {
+									if (i == 0) {
+										selectInput.appendChild(createOption("", "Pilihan Edge", false, true));
+									} else {
+										selectInput.appendChild(createOption("edge-" + el.edge[i - 1].id, el.edge[i - 1].start_text + " - " + el.edge[i - 1].end_text, false, false));
+									}
+								}
+
+								buttonSaveJawaban.onclick = () => this.saveJawabanPilih(el.id);
+								divSoalButton.appendChild(selectInput);
+								// divSoal.appendChild(selectInput)
+							} else {
+								buttonSaveJawaban.onclick = () => this.saveJawabanGraf(el.id, el.bentuk_soal)
+							}
 
 							divSoalButton.appendChild(buttonSaveJawaban);
 							divSoal.appendChild(divSoalButton);
@@ -140,6 +212,29 @@
 
 			function saveJawabanMatriks(id_soal) {
 				console.log(arrMatriks)
+				kirimJawaban(id_soal, "membuat-matriks", arrMatriks);
+			}
+
+			let pilihNode = {
+				id_soal: "",
+				jawaban: ""
+			}
+
+			function saveJawabanPilih(id_soal) {
+				kirimJawaban(id_soal, "pilih-node", pilihNode);
+			}
+
+			let arrEsai = {
+				id_soal: "",
+				jawaban: ""
+			};
+
+			function saveJawabanIsian(id_soal) {
+				arrEsai = {
+					id_soal: id_soal,
+					jawaban: document.getElementById("isian-esai-" + id_soal).value
+				}
+				kirimJawaban(id_soal, "isian-esai", arrEsai);
 			}
 
 			function kirimJawaban(id_soal, bentukSoal, dataKirim) {
@@ -158,7 +253,7 @@
 			}
 
 			// graf interactive
-			function populateNode(canvasId, data, bentukSoal, id_soal) {
+			function populateNode(canvasId, data, bentukSoal, id_soal, edge) {
 				let graph = null;
 				if (bentukSoal === "membuat-graf-euler") {
 					graph = new Graph(canvasId, true, true)
@@ -180,6 +275,14 @@
 					});
 				});
 
+				if (bentukSoal == "pilih-node") {
+					edge.forEach(elEdge => {
+						let start_node = graph.getNodeById(nodeData.find(el => el.id == elEdge.start_node_id).nodeId);
+						let end_node = graph.getNodeById(nodeData.find(el => el.id == elEdge.end_node_id).nodeId);
+						start_node.connect(end_node);
+					});
+				}
+
 				createdNode.push({
 					id_soal: id_soal,
 					data: nodeData
@@ -189,6 +292,7 @@
 					id_soal: id_soal,
 					graphObj: graph
 				})
+
 			}
 
 			// drag-and-drop interactive
@@ -303,9 +407,6 @@
 					interact("#graf-" + el.id)
 						.dropzone({
 							ondrop: function(event) {
-								// console.log(event.target.id); //dropbox (graf)
-								// console.log(event.relatedTarget.id); //draggable item (node or edge)
-
 								arrDrag = arrDrag.filter(el => el.id_jawaban != event.relatedTarget.id.split("-")[1]);
 								arrDrag.push({
 									id_soal: el.id_soal,

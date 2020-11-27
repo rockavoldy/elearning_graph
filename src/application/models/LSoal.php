@@ -12,16 +12,7 @@ class LSoal extends CI_Model
             $this->db->where('id', $el['id']);
             $soal = $this->db->get('soal')->row_array();
 
-            if ($soal['bentuk_soal'] != "drag-and-drop") {
-                $this->db->where('id_soal', $el['id']);
-                $node = $this->db->get("node_graf")->result_array();
-                array_push($ret, array(
-                    "id" => $soal['id'],
-                    "soal" => $soal['soal'],
-                    "bentuk_soal" => $soal['bentuk_soal'],
-                    "node" => $node
-                ));
-            } else {
+            if ($soal['bentuk_soal'] == "drag-and-drop") {
                 $this->db->where('id_soal', $el['id']);
                 $this->db->where("bentuk", "graf");
                 $graf = $this->db->get("soal_graf_text")->result_array();
@@ -42,6 +33,28 @@ class LSoal extends CI_Model
                     "node" => $node,
                     "edge" => $edge,
                 ));
+            } else if ($soal['bentuk_soal'] == 'pilih-node') {
+                $this->db->where('id_soal', $el['id']);
+                $node = $this->db->get("node_graf")->result_array();
+                $this->db->where('id_soal', $el['id']);
+                $this->db->select("id, start_node_id, end_node_id, id_soal, directional, kunci, (SELECT text FROM node_graf WHERE id = start_node_id) as start_text, (SELECT text FROM node_graf WHERE id = end_node_id) as end_text");
+                $edge = $this->db->get("edge_graf")->result_array();
+                array_push($ret, array(
+                    "id" => $soal['id'],
+                    "soal" => $soal['soal'],
+                    "bentuk_soal" => $soal['bentuk_soal'],
+                    "node" => $node,
+                    "edge" => $edge
+                ));
+            } else {
+                $this->db->where('id_soal', $el['id']);
+                $node = $this->db->get("node_graf")->result_array();
+                array_push($ret, array(
+                    "id" => $soal['id'],
+                    "soal" => $soal['soal'],
+                    "bentuk_soal" => $soal['bentuk_soal'],
+                    "node" => $node
+                ));
             }
         }
 
@@ -55,16 +68,7 @@ class LSoal extends CI_Model
         $this->db->where('id', $id_soal);
         $soal = $this->db->get('soal')->row_array();
 
-        if ($soal['bentuk_soal'] != "drag-and-drop") {
-            $this->db->where('id_soal', $id_soal);
-            $node = $this->db->get("node_graf")->result_array();
-            $ret_array = array(
-                "id" => $soal['id'],
-                "soal" => $soal['soal'],
-                "bentuk_soal" => $soal['bentuk_soal'],
-                "node" => $node
-            );
-        } else {
+        if ($soal['bentuk_soal'] == "drag-and-drop") {
             $this->db->where('id_soal', $soal['id']);
             $this->db->where("bentuk", "graf");
             $graf = $this->db->get("soal_graf_text")->result_array();
@@ -85,6 +89,28 @@ class LSoal extends CI_Model
                 "node" => $node,
                 "edge" => $edge,
             );
+        } else if ($soal['bentuk_soal'] == "pilih-node") {
+            $this->db->where("id_soal", $id_soal);
+            $node = $this->db->get("node_graf")->result_array();
+            $this->db->where("id_soal", $id_soal);
+            $this->db->select("id, start_node_id, end_node_id, id_soal, directional, kunci, (SELECT text FROM node_graf WHERE id = start_node_id) as start_text, (SELECT text FROM node_graf WHERE id = end_node_id) as end_text");
+            $edge = $this->db->get("edge_graf")->result_array();
+            $ret_array = array(
+                "id" => $soal['id'],
+                "soal" => $soal['soal'],
+                "bentuk_soal" => $soal['bentuk_soal'],
+                "node" => $node,
+                "edge" => $edge
+            );
+        } else {
+            $this->db->where('id_soal', $id_soal);
+            $node = $this->db->get("node_graf")->result_array();
+            $ret_array = array(
+                "id" => $soal['id'],
+                "soal" => $soal['soal'],
+                "bentuk_soal" => $soal['bentuk_soal'],
+                "node" => $node
+            );
         }
 
         return $ret_array;
@@ -95,6 +121,11 @@ class LSoal extends CI_Model
         if ($bentukSoal == "membuat-graf") {
             $this->db->insert_batch("jawaban_edge_graf", $data);
         }
+    }
+
+    public function saveJawabanEsai($data)
+    {
+        $this->db->insert("jawaban_esai", $data);
     }
 
     public function createSoal($kode_topik, $deskripsi, $data, $bentukSoal)
@@ -109,7 +140,7 @@ class LSoal extends CI_Model
         switch ($bentukSoal) {
             case "membuat-graf":
                 $this->_insertNode($data['node'], $id_soal);
-                $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
+                // $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
                 break;
             case "membuat-graf-euler":
                 $this->_insertNode($data['node'], $id_soal);
@@ -119,15 +150,15 @@ class LSoal extends CI_Model
                 break;
             case "membuat-matriks":
                 $this->_insertNode($data['node'], $id_soal);
-                $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
+                // $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
                 break;
             case "pilih-node":
                 $this->_insertNode($data['node'], $id_soal);
-                $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
+                $this->_insertEdge($data['edge'], false, $id_soal);
                 break;
-            case "isian-array":
-                $this->_insertNode($data['node'], $id_soal);
-                $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
+            case "isian-esai":
+                // $this->_insertNode($data['node'], $id_soal);
+                // $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
                 break;
             default:
                 return false;
@@ -147,6 +178,23 @@ class LSoal extends CI_Model
     public function saveKunciJawaban($data)
     {
         $this->db->insert("kunci_jawaban_edge_graf", $data);
+    }
+
+    public function saveJawabanPilih($data)
+    {
+        $this->db->insert("jawaban_pilih", $data);
+    }
+
+    public function saveKunciJawabanPilihNode($data)
+    {
+        $this->db->where("id", $data['id']);
+        $this->db->where("id_soal", $data['id_soal']);
+        $this->db->set("kunci", true);
+        if ($data['bentuk'] == "node") {
+            $this->db->update("node_graf");
+        } else {
+            $this->db->update("edge_graf");
+        }
     }
 
     public function delKunciJawaban($data)
@@ -176,6 +224,14 @@ class LSoal extends CI_Model
         return $this->db->get("soal_graf_text")->row_array();
     }
 
+    public function getJawabanGraf($id_soal, $id_mhs)
+    {
+        $this->db->where("id_soal", $id_soal);
+        $this->db->where("id_mhs", $id_mhs);
+        $this->db->order_by("id_soal");
+        return $this->db->get("jawaban_edge_graf")->result_array();
+    }
+
     public function getJawabanDrag($id_soal, $id_mhs)
     {
         $this->db->where("id_soal", $id_soal);
@@ -198,6 +254,16 @@ class LSoal extends CI_Model
         }
     }
 
+    public function saveJawabanGraf($data, $bentukSoal)
+    {
+        $this->db->insert_batch("jawaban_edge_graf", $data);
+    }
+
+    public function saveJawabanMatriks($data)
+    {
+        $this->db->insert("jawaban_edge_graf", $data);
+    }
+
     public function saveNilaiMhs($data)
     {
         $this->db->insert("nilai_mhs", $data);
@@ -211,6 +277,7 @@ class LSoal extends CI_Model
     public function getKunciJawaban($id_soal)
     {
         $this->db->where("id_soal", $id_soal);
+        $this->db->order_by("id_soal");
         return $this->db->get("kunci_jawaban_edge_graf")->result_array();
     }
 
