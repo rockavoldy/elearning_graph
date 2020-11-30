@@ -65,6 +65,7 @@
 						divSoalText.setAttribute("class", "w-100");
 
 						let buttonSaveJawaban = document.createElement("button");
+						buttonSaveJawaban.id = "buttonSaveJawaban-" + el.id;
 						buttonSaveJawaban.setAttribute("class", "btn btn-primary");
 						buttonSaveJawaban.appendChild(document.createTextNode("Simpan Jawaban"));
 
@@ -130,7 +131,7 @@
 							selectInput.onchange = function(event) {
 								pilihNode = {
 									id_soal: el.id_soal,
-									jawaban: event.target.id
+									jawaban: event.target.value
 								}
 							}
 							if (el.bentuk_soal == 'pilih-node') {
@@ -173,6 +174,8 @@
 					})
 				});
 
+			let kirimJawabanModal = {};
+
 			let arrGraph = [];
 
 			// function to save jawaban
@@ -197,7 +200,7 @@
 					})
 				}
 				console.log(kirim);
-				kirimJawaban(id_soal, bentukSoal, kirim)
+				showModalSaveJawaban(id_soal, bentukSoal, kirim)
 			}
 
 			let arrDrag = [];
@@ -205,14 +208,15 @@
 
 			function saveJawabanDrag(id_soal) {
 				console.log(arrDrag);
-				kirimJawaban(id_soal, "drag-and-drop", arrDrag);
+
+				showModalSaveJawaban(id_soal, "drag-and-drop", arrDrag);
 			}
 
 			let arrMatriks = [];
 
 			function saveJawabanMatriks(id_soal) {
 				console.log(arrMatriks)
-				kirimJawaban(id_soal, "membuat-matriks", arrMatriks);
+				showModalSaveJawaban(id_soal, "membuat-matriks", arrMatriks);
 			}
 
 			let pilihNode = {
@@ -221,7 +225,7 @@
 			}
 
 			function saveJawabanPilih(id_soal) {
-				kirimJawaban(id_soal, "pilih-node", pilihNode);
+				showModalSaveJawaban(id_soal, "pilih-node", pilihNode);
 			}
 
 			let arrEsai = {
@@ -234,7 +238,7 @@
 					id_soal: id_soal,
 					jawaban: document.getElementById("isian-esai-" + id_soal).value
 				}
-				kirimJawaban(id_soal, "isian-esai", arrEsai);
+				showModalSaveJawaban(id_soal, "isian-esai", arrEsai);
 			}
 
 			function kirimJawaban(id_soal, bentukSoal, dataKirim) {
@@ -249,8 +253,28 @@
 					})
 					.done(function(res) {
 						console.log(res);
+						if (res.tuntas) {
+							let buttonDisabled = document.getElementById("buttonSaveJawaban-" + id_soal);
+							buttonDisabled.setAttribute("disabled", "true");
+						} else {
+							alert("Jawban masih belum benar, anda bisa mencoba lagi");
+						}
+						$("#modalSaveJawaban").modal("toggle");
 					});
 			}
+
+			function showModalSaveJawaban(id_soal, bentuk_soal, data_jawaban) {
+				kirimJawabanModal = {
+					id_soal: id_soal,
+					bentuk_soal: bentuk_soal,
+					data_jawaban: data_jawaban
+				}
+				$("#modalSaveJawaban").modal("show");
+			}
+			
+			$("#saveSoalButtonModal").on("click", function (event) {
+				kirimJawaban(kirimJawabanModal.id_soal, kirimJawabanModal.bentuk_soal, kirimJawabanModal.data_jawaban);
+			})
 
 			// graf interactive
 			function populateNode(canvasId, data, bentukSoal, id_soal, edge) {

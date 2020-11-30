@@ -162,13 +162,14 @@ class API extends CI_Controller
             $nilaiDrag = $this->checkJawabanDrag($id_soal, $dataJawaban, $id_mhs);
             $response = array(
                 "message" => "success",
-                "nilai" => $nilaiDrag['nilai'],
+                "tuntas" => $nilaiDrag,
                 "data" => $dataJawaban,
             );
         } else if ($bentukSoal == "isian-esai") {
             $this->LSoal->saveJawabanEsai(["id_soal" => $id_soal, "jawaban" => $dataJawaban['jawaban'], "id_mhs" =>  $id_mhs]);
             $response = array(
-                "message" => "success"
+                "message" => "success",
+                "tuntas" => true
             );
         } else if ($bentukSoal == "membuat-matriks") {
             $arrKirim = array();
@@ -184,35 +185,53 @@ class API extends CI_Controller
                 $nilaiGraf = $this->checkJawabanGraf($id_soal, $arrKirim, $id_mhs, $bentukSoal);
                 $response = array(
                     "message" => "success",
-                    "nilai" => $nilaiGraf['nilai'],
+                    "tuntas" => $nilaiGraf,
                     "data" => $arrKirim
                 );
             }
         } else if ($bentukSoal == "pilih-node") {
             $explodeId = explode("-", $dataJawaban['jawaban']);
-            $this->LSoal->saveJawabanPilih(array(
+            $jawab = array(
                 "id_soal" => $id_soal,
                 "id_jawaban" => $explodeId[1],
                 "id_mhs" => $id_mhs,
                 "bentuk" => $explodeId[0]
-            ));
+            );
+            $this->LSoal->saveJawabanPilih($jawab);
+
+            $nilaiPilih = $this->checkJawabanPilih($id_soal, $jawab, $id_mhs);
 
             $response = array(
                 "message" => "success",
-                "nilai" => $nilaiGraf['nilai'],
+                "tuntas" => $nilaiPilih,
                 "data" => $dataJawaban
             );
         } else {
             $nilaiGraf = $this->checkJawabanGraf($id_soal, $dataJawaban, $id_mhs, $bentukSoal);
             $response = array(
                 "message" => "success",
-                "nilai" => $nilaiGraf['nilai'],
+                "tuntas" => $nilaiGraf,
                 "data" => $dataJawaban
             );
         }
 
         echo json_encode($response);
         return true;
+    }
+
+    private function checkJawabanPilih($id_soal, $jawaban, $id_mhs) {
+        $kirim = array(
+            "id_mhs" => $id_mhs,
+            "id_soal" => $id_soal,
+            "nilai" => 0
+            );
+        $kunciJawaban = $this->LSoal->getKunciJawabanPilih($id_soal);
+        if ($jawaban['id_jawaban'] == $kunciJawaban['id_kunci']) {
+            $this->LSoal->saveNilaiMhs(["id_mhs" => $id_mhs, "id_soal" => $id_soal, "nilai" => 100]); 
+            return true;
+        }
+
+        return false;
     }
 
     private function checkJawabanGraf($idSoal, $dataJawaban, $idMhs, $bentukSoal)
@@ -234,31 +253,37 @@ class API extends CI_Controller
         $dataJawaban = $this->LSoal->getjawabanGraf($idSoal, $idMhs);
 
 
-        $nilai = array(
-            "id_soal" => $idSoal,
-            "id_mhs" => $idMhs,
-            "nilai" => 0
-        );
+        $nilai = 0;
 
-        $pembagiSoal = count($kunciJawaban) + 1;
-        $nilaiPerSoal = 100 / $pembagiSoal;
-        $bobotNilai = 100 / (count($dataJawaban) + 1);
+        $bobotNilai = 100 / count($kunciJawaban);
 
         foreach ($kunciJawaban as $kunci) {
             foreach ($dataJawaban as $jawaban) {
-                $nilaiTemp = 0;
                 if ($kunci['id_soal'] == $jawaban['id_soal']) {
-                    if ($kunci['start_node_id'] == $jawaban['start_node_id'] && $kunci['end_node_id'] == $jawaban['end_node_id']) {
-                        $nilaiTemp += $bobotNilai;
+                    if ($kunci['directional']) {
+                        if ($kunci['start_node_id'] == $jawaban['start_node_id'] && $kunci['end_node_id'] == $jawaban['end_node_id']) {
+                            $nilai += $bobotNilai;
+                            break 1;
+                        }
+                    } else {
+                        if (($kunci['start_node_id'] == $jawaban['start_node_id'] && 
+                        $kunci['end_node_id'] == $jawaban['end_node_id']) ||
+                        ($kunci['end_node_id'] == $jawaban['start_node_id'] && 
+                        $kunci['start_node_id'] == $jawaban['end_node_id'])) {
+                            $nilai += $bobotNilai;
+                            break 1;
+                        }
                     }
-                    $nilai['nilai'] = $nilai['nilai'] + ($nilaiTemp * $nilaiPerSoal / 100);
-                    break;
                 }
             }
         }
 
-        $this->LSoal->saveNilaiMhs($nilai);
-        return $nilai;
+
+        if ($nilai == 100) {
+            $this->LSoal->saveNilaiMhs(['id_soal' => $idSoal, 'id_mhs' => $idMhs, 'nilai' => $nilai]);
+            return true;
+        }
+        return false;
     }
 
     private function checkJawabanDrag($idSoal, $dataJawaban, $idMhs)
@@ -292,34 +317,29 @@ class API extends CI_Controller
 
         $dataJawaban = $this->LSoal->getJawabanDrag($idSoal, $idMhs);
 
-        $nilai = array(
-            "id_soal" => $idSoal,
-            "id_mhs" => $idMhs,
-            "nilai" => 0
-        );
-
-        $pembagiSoal = count($kunciJawaban) + 1;
-        $nilaiPerSoal = 100 / $pembagiSoal;
+        $nilai = 0;
 
         foreach ($kunciJawaban as $kunci) {
             foreach ($dataJawaban as $jawaban) {
-                $nilaiTemp = 0;
                 if ($kunci['id_text_graf'] == $jawaban['id_text_graf']) {
                     if ($kunci['id_text_node'] == $jawaban['id_text_node']) {
-                        $nilaiTemp += 50;
+                        $nilai+=50;
                     }
                     if ($kunci['id_text_edge'] == $jawaban['id_text_edge']) {
-                        $nilaiTemp += 50;
+                        $nilai+=50;
                     }
-                    $nilai['nilai'] = $nilai['nilai'] + ($nilaiTemp * $nilaiPerSoal / 100);
-                    break;
                 }
             }
-            // $nilai['nilai'] += $nilaiTemp;
         }
 
-        $this->LSoal->saveNilaiMhs($nilai);
-        return $nilai;
+        $nilai = $nilai / count($kunciJawaban);
+
+        if ($nilai == 100) {
+            $this->LSoal->saveNilaiMhs(['id_soal' => $idSoal, 'id_mhs' => $idMhs, 'nilai' => $nilai]);
+            return true;
+        }
+        
+        return false;
     }
 
     private function getNode($node)

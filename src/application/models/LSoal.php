@@ -266,7 +266,13 @@ class LSoal extends CI_Model
 
     public function saveNilaiMhs($data)
     {
+        $this->db->where("id_mhs", $data['id_mhs']);
+        $this->db->where("id_soal", $data['id_soal']);
+        if ($this->db->get("nilai_mhs")->num_rows() > 0) {
+            return true;
+        }
         $this->db->insert("nilai_mhs", $data);
+        return true;
     }
 
     public function saveKunciJawabanDrag($data)
@@ -286,6 +292,31 @@ class LSoal extends CI_Model
         $this->db->where("id_soal", $id_soal);
         $this->db->order_by("id_text_graf");
         return $this->db->get("kunci_jawaban_graf_text")->result_array();
+    }
+
+    public function getKunciJawabanPilih($id_soal)
+    {
+        $this->db->where("id_soal", $id_soal);
+        $this->db->where("kunci", 1);
+        $node = $this->db->get("node_graf");
+        if ($node->num_rows() > 0) {
+            return array(
+                "bentuk" => "node",
+                "id_kunci" => $node->row_array()['id']
+            );
+        }
+
+        $this->db->where("id_soal", $id_soal);
+        $this->db->where("kunci", 1);
+        $edge = $this->db->get("edge_graf");
+        if ($edge->num_rows() > 0) {
+            return array(
+                "bentuk" => "node",
+                "id_kunci" => $edge->row_array()['id']
+            );
+        }
+
+        return false;
     }
 
     public function getNodeGraf()
