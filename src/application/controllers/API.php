@@ -70,7 +70,6 @@ class API extends CI_Controller
                 "message" => $message
             );
         }
-        // TODO: implement isian esai
         echo json_encode($response);
         return true;
     }

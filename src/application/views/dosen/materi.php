@@ -285,7 +285,6 @@
 			}
 		}
 
-		// TODO: implement isian
 		console.log(data);
 
 		$.ajax({

@@ -25,6 +25,10 @@ class LSoal extends CI_Model
                 $this->db->where("bentuk", "edge");
                 $edge = $this->db->get("soal_graf_text")->result_array();
 
+                $this->db->where("id_soal", $el['id']);
+                $this->db->where("id_mhs", $this->session->userdata("id"));
+                $cek = $this->db->get("nilai_mhs")->num_rows();
+
                 array_push($ret, array(
                     "id" => $soal['id'],
                     "soal" => $soal['soal'],
@@ -32,6 +36,7 @@ class LSoal extends CI_Model
                     "graf" => $graf,
                     "node" => $node,
                     "edge" => $edge,
+                    "tuntas" => $cek > 0 ? true: false,
                 ));
             } else if ($soal['bentuk_soal'] == 'pilih-node') {
                 $this->db->where('id_soal', $el['id']);
@@ -39,21 +44,44 @@ class LSoal extends CI_Model
                 $this->db->where('id_soal', $el['id']);
                 $this->db->select("id, start_node_id, end_node_id, id_soal, directional, kunci, (SELECT text FROM node_graf WHERE id = start_node_id) as start_text, (SELECT text FROM node_graf WHERE id = end_node_id) as end_text");
                 $edge = $this->db->get("edge_graf")->result_array();
+
+                $this->db->where("id_soal", $el['id']);
+                $this->db->where("id_mhs", $this->session->userdata("id"));
+                $cek = $this->db->get("nilai_mhs")->num_rows();
+
                 array_push($ret, array(
                     "id" => $soal['id'],
                     "soal" => $soal['soal'],
                     "bentuk_soal" => $soal['bentuk_soal'],
                     "node" => $node,
-                    "edge" => $edge
+                    "edge" => $edge,
+                    "tuntas" => $cek > 0 ? true : false,
                 ));
-            } else {
-                $this->db->where('id_soal', $el['id']);
-                $node = $this->db->get("node_graf")->result_array();
+            } else if ($soal['bentuk_soal'] == 'isian-esai') {
+                $this->db->where("id_soal", $el['id']);
+                $this->db->where("id_mhs", $this->session->userdata("id"));
+                $cek = $this->db->get("jawaban_esai")->num_rows();
+
                 array_push($ret, array(
                     "id" => $soal['id'],
                     "soal" => $soal['soal'],
                     "bentuk_soal" => $soal['bentuk_soal'],
-                    "node" => $node
+                    "tuntas" => $cek > 0 ? true : false,
+                ));
+            } else {
+                $this->db->where('id_soal', $el['id']);
+                $node = $this->db->get("node_graf")->result_array();
+
+                $this->db->where("id_soal", $el['id']);
+                $this->db->where("id_mhs", $this->session->userdata("id"));
+                $cek = $this->db->get("nilai_mhs")->num_rows();
+
+                array_push($ret, array(
+                    "id" => $soal['id'],
+                    "soal" => $soal['soal'],
+                    "bentuk_soal" => $soal['bentuk_soal'],
+                    "node" => $node,
+                    "tuntas" => $cek > 0 ? true : false,
                 ));
             }
         }
@@ -216,7 +244,6 @@ class LSoal extends CI_Model
         return false;
     }
 
-    // TODO: delete checkbox not work
 
     public function getGrafTextById($id)
     {

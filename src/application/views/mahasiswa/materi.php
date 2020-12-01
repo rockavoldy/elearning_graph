@@ -67,6 +67,7 @@
 						let buttonSaveJawaban = document.createElement("button");
 						buttonSaveJawaban.id = "buttonSaveJawaban-" + el.id;
 						buttonSaveJawaban.setAttribute("class", "btn btn-primary");
+						el.tuntas == true ? buttonSaveJawaban.setAttribute("disabled", "true") : false;
 						buttonSaveJawaban.appendChild(document.createTextNode("Simpan Jawaban"));
 
 						if (el.bentuk_soal == "drag-and-drop") {
