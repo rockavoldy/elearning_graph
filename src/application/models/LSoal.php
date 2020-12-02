@@ -36,7 +36,7 @@ class LSoal extends CI_Model
                     "graf" => $graf,
                     "node" => $node,
                     "edge" => $edge,
-                    "tuntas" => $cek > 0 ? true: false,
+                    "tuntas" => $cek > 0 ? true : false,
                 ));
             } else if ($soal['bentuk_soal'] == 'pilih-node') {
                 $this->db->where('id_soal', $el['id']);
@@ -60,7 +60,7 @@ class LSoal extends CI_Model
             } else if ($soal['bentuk_soal'] == 'isian-esai') {
                 $this->db->where("id_soal", $el['id']);
                 $this->db->where("id_mhs", $this->session->userdata("id"));
-                $cek = $this->db->get("jawaban_esai")->num_rows();
+                $cek = $this->db->get("nilai_mhs")->num_rows();
 
                 array_push($ret, array(
                     "id" => $soal['id'],
@@ -130,6 +130,7 @@ class LSoal extends CI_Model
                 "node" => $node,
                 "edge" => $edge
             );
+            
         } else {
             $this->db->where('id_soal', $id_soal);
             $node = $this->db->get("node_graf")->result_array();
@@ -153,7 +154,15 @@ class LSoal extends CI_Model
 
     public function saveJawabanEsai($data)
     {
+        $this->db->where("id_soal", $data['id_soal']);
+        $cek = $this->db->get("jawaban_esai");
+        if ($cek->num_rows() > 0) {
+            $this->db->where("id_soal", $data['id_soal']);
+            $this->db->update("jawaban_esai", $data);
+            return true;
+        }
         $this->db->insert("jawaban_esai", $data);
+        return true;
     }
 
     public function createSoal($kode_topik, $deskripsi, $data, $bentukSoal)
@@ -185,8 +194,7 @@ class LSoal extends CI_Model
                 $this->_insertEdge($data['edge'], false, $id_soal);
                 break;
             case "isian-esai":
-                // $this->_insertNode($data['node'], $id_soal);
-                // $this->_insertEdge($data['edge'], $data['directional'], $id_soal);
+                $this->db->insert("kunci_jawaban_esai", ["id_soal" => $id_soal, "jawaban_node" => trim($data['node']), "jawaban_edge" => trim($data['edge'])]);
                 break;
             default:
                 return false;
@@ -344,6 +352,12 @@ class LSoal extends CI_Model
         }
 
         return false;
+    }
+
+    public function getKunciJawabanEsai($id_soal)
+    {
+        $this->db->where("id_soal", $id_soal);
+        return $this->db->get("kunci_jawaban_esai")->row_array();
     }
 
     public function getNodeGraf()

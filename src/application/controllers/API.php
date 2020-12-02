@@ -55,10 +55,12 @@ class API extends CI_Controller
                 "message" => $message
             );
         } else if ($bentukSoal == "isian-esai") {
+            $listNode = $this->input->post("listNode");
+            $listEdge = $this->input->post('listEdge');
             $response = array(
                 "deskripsi" => $deskripsiSoal,
                 // "data" => $listNode,
-                "message" => $this->LSoal->createSoal($kode_topik, $deskripsiSoal, [], $bentukSoal)
+                "message" => $this->LSoal->createSoal($kode_topik, $deskripsiSoal, ['node' => $listNode, "edge" => $listEdge], $bentukSoal)
             );
         } else { // membuat graf
             $listNode = $this->getNode($this->input->post("listNode"));
@@ -165,11 +167,24 @@ class API extends CI_Controller
                 "data" => $dataJawaban,
             );
         } else if ($bentukSoal == "isian-esai") {
-            $this->LSoal->saveJawabanEsai(["id_soal" => $id_soal, "jawaban" => $dataJawaban['jawaban'], "id_mhs" =>  $id_mhs]);
+            $this->LSoal->saveJawabanEsai(["id_soal" => $id_soal, 
+            "jawaban_node" => trim($dataJawaban['jawaban_node']), 
+            "jawaban_edge" => trim($dataJawaban['jawaban_edge']), 
+            "id_mhs" =>  $id_mhs]);
+
+            $kunciJawbaanEsai = $this->LSoal->getKunciJawabanEsai($id_soal);
+            $isTuntas = false;
+
+            if ($kunciJawbaanEsai['jawaban_node'] == $dataJawaban['jawaban_node'] && $kunciJawbaanEsai['jawaban_edge'] == $dataJawaban['jawaban_edge']) {
+                $isTuntas = true;
+                $this->LSoal->saveNilaiMhs(['id_soal' => $id_soal, 'id_mhs' => $id_mhs, 'nilai' => 100]);
+            }
+
             $response = array(
                 "message" => "success",
-                "tuntas" => true
+                "tuntas" => $isTuntas
             );
+
         } else if ($bentukSoal == "membuat-matriks") {
             $arrKirim = array();
             foreach ($dataJawaban as $el) {

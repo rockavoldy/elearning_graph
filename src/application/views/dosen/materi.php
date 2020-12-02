@@ -32,7 +32,6 @@
 						<?php if ($el['bentuk_soal'] != "isian-esai") { ?>
 							<button class="btn btn-primary" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalKunciJawaban">Kunci Jawaban</button>
 						<?php } ?>
-						<button class="btn btn-info" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalEditSoal">Edit</button>
 						<button class="btn btn-danger" type="button" data-toggle="modal" data-soalid="<?php echo $el['id'] ?>" data-target="#modalHapusSoal">Hapus</button>
 					</td>
 
@@ -220,8 +219,6 @@
 				divSoalCustom.appendChild(divFormGroupArray);
 			}
 
-		} else if (event.target.value == 'isian-esai') {
-
 		} else {
 			let heading5 = document.createElement("h5");
 			heading5.appendChild(document.createTextNode(event.target.selectedOptions[0].text));
@@ -241,7 +238,7 @@
 			divFormGroupArray.appendChild(labelFormArray);
 			divFormGroupArray.appendChild(inputFormArray);
 			divSoalCustom.appendChild(divFormGroupArray);
-			if (event.target.value == 'pilih-node') {
+			if (event.target.value == 'pilih-node' || event.target.value == "isian-esai") {
 				let divFormGroupArrayEdge = document.createElement("div");
 				divFormGroupArrayEdge.setAttribute("class", "form-group");
 
@@ -252,7 +249,7 @@
 				let inputFormArrayEdge = document.createElement("input");
 				inputFormArrayEdge.setAttribute("type", "text");
 				inputFormArrayEdge.setAttribute("class", "form-control");
-				inputFormArrayEdge.setAttribute("placeholder", "{(A, B), (A, C)}")
+				inputFormArrayEdge.setAttribute("placeholder", "{(A, B); (A, C)}")
 				inputFormArrayEdge.id = "listEdge-" + event.target.value;
 
 				divFormGroupArrayEdge.appendChild(labelFormArrayEdge);
@@ -272,7 +269,7 @@
 				dataSoalNode: $("#listNode-" + bentukSoal).val(),
 				dataSoalEdge: $("#listEdge-" + bentukSoal).val()
 			}
-		} else if (bentukSoal == "pilih-node") {
+		} else if (bentukSoal == "pilih-node" || bentukSoal == "isian-esai") {
 			data = {
 				deskripsiSoal: $("#deskripsiSoal").val(),
 				listNode: $("#listNode-" + bentukSoal).val(),

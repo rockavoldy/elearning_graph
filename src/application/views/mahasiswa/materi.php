@@ -99,12 +99,38 @@
 							elTugas.appendChild(divSoal);
 						} else if (el.bentuk_soal == "isian-esai") {
 							buttonSaveJawaban.onclick = () => this.saveJawabanIsian(el.id)
-							let divTextarea = document.createElement("textarea");
-							divTextarea.setAttribute("class", "form-control");
-							divTextarea.id = "isian-esai-" + el.id;
-							divTextarea.setAttribute("placeholder", "Isi jawaban disini");
-							divSoal.appendChild(divSoalText);
-							divSoal.appendChild(divTextarea);
+							let divFormGroupArray = document.createElement("div");
+							divFormGroupArray.setAttribute("class", "form-group");
+
+							let labelFormArray = document.createElement("label");
+							labelFormArray.setAttribute("for", "listNode-" + el.id);
+							labelFormArray.appendChild(document.createTextNode("Array Node"));
+							let inputFormArray = document.createElement("input");
+							inputFormArray.setAttribute("type", "text");
+							inputFormArray.setAttribute("class", "form-control");
+							inputFormArray.setAttribute("placeholder", "{A, B, C}")
+							inputFormArray.id = "listNode-" + el.id;
+							divFormGroupArray.appendChild(labelFormArray);
+							divFormGroupArray.appendChild(inputFormArray);
+
+							let divFormGroupArrayEdge = document.createElement("div");
+							divFormGroupArrayEdge.setAttribute("class", "form-group");
+
+							let labelFormArrayEdge = document.createElement("label");
+							labelFormArrayEdge.setAttribute("for", "listEdge-" + el.id);
+							labelFormArrayEdge.appendChild(document.createTextNode("Array Edge"));
+
+							let inputFormArrayEdge = document.createElement("input");
+							inputFormArrayEdge.setAttribute("type", "text");
+							inputFormArrayEdge.setAttribute("class", "form-control");
+							inputFormArrayEdge.setAttribute("placeholder", "{(A, B); (A, C)}")
+							inputFormArrayEdge.id = "listEdge-" + el.id;
+
+							divFormGroupArrayEdge.appendChild(labelFormArrayEdge);
+							divFormGroupArrayEdge.appendChild(inputFormArrayEdge);
+							
+							divSoal.appendChild(divFormGroupArray);
+							divSoal.appendChild(divFormGroupArrayEdge);
 
 							divSoalButton.appendChild(buttonSaveJawaban);
 							divSoal.appendChild(divSoalButton);
@@ -231,13 +257,15 @@
 
 			let arrEsai = {
 				id_soal: "",
-				jawaban: ""
+				jawaban_node: "",
+				jawaban_edge: ""
 			};
 
 			function saveJawabanIsian(id_soal) {
 				arrEsai = {
 					id_soal: id_soal,
-					jawaban: document.getElementById("isian-esai-" + id_soal).value
+					jawaban_node: document.getElementById("listNode-" + id_soal).value,
+					jawaban_edge: document.getElementById("listEdge-" + id_soal).value
 				}
 				showModalSaveJawaban(id_soal, "isian-esai", arrEsai);
 			}
