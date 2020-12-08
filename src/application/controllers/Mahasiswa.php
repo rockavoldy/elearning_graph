@@ -190,17 +190,8 @@ class Mahasiswa extends CI_Controller
             $this->load->view('mahasiswa/evaluasi', $sdata);
         } else {
             $sdata['akses'] = false;
-            //cek evaluasi
-            $total_tugas = 0;
-            $jumlah_topik = 0;
-            foreach ($data['topik'] as $key) {
-                $tugas = $this->LModel->getJtugas($id = $this->session->userdata('id'), $key->id_topik)->row();
-                if ($tugas) {
-                    $total_tugas++;
-                }
-                $jumlah_topik++;
-            }
-            if ($jumlah_topik == $total_tugas) {
+            if ($this->LModel->getJSoal($this->session->userdata("id"))) {
+                $sdata['akses'] = true;
                 $this->load->view('mahasiswa/evaluasi', $sdata);
             } else {
                 $this->load->view('mahasiswa/error', $sdata);

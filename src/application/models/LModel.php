@@ -71,5 +71,19 @@ class LModel extends CI_model
 		$this->db->from('mahasiswa');
 		return $this->db->get();
 	}
+
+	function getJSoal($id_mhs) 
+	{
+		$soal = $this->db->get("soal")->num_rows();
+
+		$this->db->where("id_mhs", $id_mhs);
+		$nilai = $this->db->get("nilai_mhs")->num_rows();
+		if ($soal == $nilai) {
+			$this->db->insert("akses", ["id_mhs" => $id_mhs, "akses" => "evaluasi"]);
+			return true;
+		}
+
+		return false;
+	}
 }
 ?>
